@@ -147,6 +147,9 @@ Temporary Items
 ### Linux ###
 *~
 
+### Oliver Needs to Hide How Disorganized He Is ###
+*.ignore
+
 # temporary files which can be created if a process still has a handle open of a deleted file
 .fuse_hidden*
 
