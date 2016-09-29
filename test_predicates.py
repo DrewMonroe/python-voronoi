@@ -1,7 +1,7 @@
 """Unittests for the predicates"""
 import unittest
 
-#import numpy as np
+# import numpy as np
 from predicates import as_columns
 from predicates import ccw
 from predicates import equal
@@ -9,6 +9,7 @@ from predicates import incircle
 from predicates import lift_matrix
 from predicates import matrix
 from predicates import vector
+
 
 class PredicatesTestCase(unittest.TestCase):
     """Unit tests for the predicates and related objects."""
@@ -36,11 +37,10 @@ class PredicatesTestCase(unittest.TestCase):
                                       [-1, -2, 10],
                                       [48, 20, 1])))
         self.assertFalse(equal(matrix([0, 1], [-1, -2]),
-                               matrix([0, 1, -1], # paranoia seems wise
+                               matrix([0, 1, -1],  # paranoia seems wise
                                       [-2, 0, 0],
                                       [0, 0, 0])))
         self.assertFalse(equal(vector(0, 1, 2), vector(1, 2)))
-
 
     def test_as_columns(self):
         """Test the thing that joins column vectors into a matrix."""
@@ -52,11 +52,10 @@ class PredicatesTestCase(unittest.TestCase):
         col3 = vector(3, 6, 9)
         self.assertTrue(equal(target, as_columns(col1, col2, col3)))
 
-
     def test_vector(self):
         """Test our standard function for making column vectors"""
         self.assertEqual(len(vector(0, 1, 2)), 3)
-        self.assertTrue(vector(0, 1, 2)) # might fail. numpy is a pain.
+        self.assertTrue(vector(0, 1, 2))  # might fail. numpy is a pain.
         # self.assertTrue(vector(0, 1, 2).any()) # feels like admitting defeat
         # depends how we want to use it:
         # self.assertTrue(vector(0, 0, 0).any())
@@ -71,8 +70,8 @@ class PredicatesTestCase(unittest.TestCase):
         # I don't much care which way is negative, but one had better
         # be positive and the other negative. And they'd better be
         # ints.
-        self.assertEqual((ccw(one_dim_high, one_dim_low)
-                          * ccw(one_dim_low, one_dim_high)),
+        self.assertEqual((ccw(one_dim_high, one_dim_low) *
+                          ccw(one_dim_low, one_dim_high)),
                          -1)
         # co-hyperplanar --> 0
         self.assertEqual(ccw(one_dim_high, one_dim_high), 0)
@@ -90,6 +89,11 @@ class PredicatesTestCase(unittest.TestCase):
         self.assertEqual(ccw(self.r2west, self.r2east, self.r2south), -1)
         self.assertEqual(ccw(self.r2west, self.r2south, self.r2north), 1)
 
+        # Swapping two args flips the sign
+        self.assertEqual(ccw(self.r2west, self.r2south, self.r2north),
+                         -ccw(self.r2south, self.r2west, self.r2north))
+        self.assertEqual(ccw(self.r2west, self.r2east, self.r2orig),
+                         -ccw(self.r2east, self.r2west, self.r2orig))
         # Warn us when we make non-square matrices
         self.assertRaises(Exception, ccw, self.r2west, self.r2south,
                           self.r2north, self.r2east)
@@ -121,7 +125,6 @@ class PredicatesTestCase(unittest.TestCase):
         self.assertEqual(incircle(self.r2north, self.r2west, self.r2east,
                                   r2far_east), -1)
 
-
     def test_lift_matrix(self):
         """Tests the lift_matrix function."""
         target = matrix([0, 1, 2],
@@ -137,3 +140,6 @@ class PredicatesTestCase(unittest.TestCase):
         self.assertTrue(equal(target, lift_matrix(base, list_test)))
         self.assertTrue(equal(target, lift_matrix(base, vector_test)))
         self.assertTrue(equal(target, lift_matrix(base, matrix_test)))
+
+if __name__ == "__main__":
+    unittest.main()
