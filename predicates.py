@@ -10,9 +10,9 @@ import numpy as np
 #from scipy import linalg # supposedly faster, but doesn't have everything
 from numpy import linalg # for accurate sign of det, hopefully
 
-def vector(*args):
+def vector(*values):
     """Make a column vector (secretly a numpy array)"""
-    return np.array([[x] for x in args])
+    return np.array([[v] for v in values])
 
 def matrix(*rows):
     """Make a matrix with the given rows."""
@@ -24,7 +24,8 @@ def equal(matrix0, matrix1):
     This matters because numpy doesn't let you use == because of
     ambiguity.
     """
-    return True # TODO. Thank you, TDD
+    return (matrix0.shape == matrix1.shape and
+            np.equal(matrix0, matrix1).all())
 
 def as_columns(*vectors):
     """Return a matrix with those vectors as columns.
@@ -101,7 +102,7 @@ def lift_matrix(base_matrix, last_row):
     The row will be flattened, which is convenient only when you weren't
     making a 3-D matrix. (I hope it never comes to that anyway.)
     """
-    raise NotImplementedError
+    return np.append(base_matrix, last_row, axis=0) # fails the test
 
 # def not_enough_tests():
 #     # This is some test code. It's not enough test code.
