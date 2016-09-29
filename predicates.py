@@ -75,8 +75,17 @@ def incircle(*vectors):#a, b, c, d):
     1 if inside, -1 if outside, and 0 if all cocircular.
     """
 
-    return ccw(*[lift(v, norm_squared) for v in vectors])
+    return (ccw(*[lift(v, norm_squared) for v in vectors]) *
+            ccw(*vectors[:-1]))
 
+
+def lift_matrix(matrix, last_row):
+    """Append a given row to the bottom of a matrix.
+
+    The row will be flattened, which is convenient only when you weren't
+    making a 3-D matrix. (I hope it never comes to that anyway.)
+    """
+    raise NotImplementedError
 
 def not_enough_tests():
     # This is some test code. It's not enough test code.
