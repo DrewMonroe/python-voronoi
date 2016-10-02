@@ -2,13 +2,7 @@
 import unittest
 
 # import numpy as np
-from predicates import as_columns
-from predicates import ccw
-from predicates import equal
-from predicates import incircle
-from predicates import lift_matrix
-from predicates import matrix
-from predicates import vector
+from point import point
 
 
 class PredicatesTestCase(unittest.TestCase):
@@ -16,32 +10,37 @@ class PredicatesTestCase(unittest.TestCase):
 
     def setUp(self):
         """Make some objects that are useful for most tests."""
-        # Used to test incircle and foo
-        self.r2north = vector(0, 1)
-        self.r2east = vector(1, 0)
-        self.r2south = vector(0, -1)
-        self.r2west = vector(-1, 0)
-        self.r2orig = vector(0, 0)
+        self.a = point(0, 0)
+        self.b = point(1, 2)
+        self.c = point(1, 2, 3)
 
-    def test_equal(self):
-        """Tests the predicate for equality of vectors/matrices."""
-        self.assertTrue(equal(vector(0, -9, 1600002),
-                              vector(0, -9, 1600002)))
-        self.assertTrue(equal(matrix([0, 1], [-1, -2]),
-                              matrix([0, 1], [-1, -2])))
-        self.assertFalse(equal(matrix([0, 1], [-1, -2]),
-                               matrix([0, 1], [-1, -5])))
-        # shouldn't throw errors if things are different sizes
-        self.assertFalse(equal(matrix([0, 1], [-1, -2]),
-                               matrix([0, 1, 2],
-                                      [-1, -2, 10],
-                                      [48, 20, 1])))
-        self.assertFalse(equal(matrix([0, 1], [-1, -2]),
-                               matrix([0, 1, -1],  # paranoia seems wise
-                                      [-2, 0, 0],
-                                      [0, 0, 0])))
-        self.assertFalse(equal(vector(0, 1, 2), vector(1, 2)))
+    def test_point(self):
+        # Make sure that we can evaluate a point to True
+        self.assertTrue(self.a)
 
+        # Test to see if length of a point makes sense
+        self.assertTrue(len(self.c) == 3)
+        self.assertTrue(len(point(1, 2, 3, 4)) == 4)
+        self.assertFalse(len(self.b) == 3)
+
+        # Make sure that we can access elements of a point by index
+        # TODO we may want to change these tests when we decide how we will
+        # implement __getitem__, also add ones to test slicing
+        self.assertTrue(self.a[0] == 0)
+        self.assertTrue(self.c[2] == 3)
+        self.assertFalse(self.b[-1] == 10)
+
+        # Test point equality
+        self.assertFalse(self.a == self.b)
+        self.assertTrue(self.b == self.b)
+        self.assertTrue(self.c == point(1, 2, 3))
+
+        # Test point subtraction
+        # TODO I can't write this test yet because we don't have a vector class
+
+    '''
+    I hate giant commented sections of code too. Don't worry, when we merge
+    this to master with actual tests it will be fixed
     def test_as_columns(self):
         """Test the thing that joins column vectors into a matrix."""
         target = matrix([1, 2, 3],
@@ -62,7 +61,6 @@ class PredicatesTestCase(unittest.TestCase):
 
     def test_ccw(self):
         """Right now this only tests ccw for 1 and 2 dimensions."""
-
         # one-dimensional test.
 
         one_dim_high = vector(1)
@@ -140,6 +138,6 @@ class PredicatesTestCase(unittest.TestCase):
         self.assertTrue(equal(target, lift_matrix(base, list_test)))
         self.assertTrue(equal(target, lift_matrix(base, vector_test)))
         self.assertTrue(equal(target, lift_matrix(base, matrix_test)))
-
+    '''
 if __name__ == "__main__":
     unittest.main()
