@@ -24,8 +24,6 @@ class PredicatesTestCase(unittest.TestCase):
         self.assertFalse(len(self.b) == 3)
 
         # Make sure that we can access elements of a point by index
-        # TODO we may want to change these tests when we decide how we will
-        # implement __getitem__, also add ones to test slicing
         self.assertTrue(self.a[0] == 0)
         self.assertTrue(self.c[2] == 3)
         self.assertFalse(self.b[-1] == 10)
@@ -34,9 +32,11 @@ class PredicatesTestCase(unittest.TestCase):
         self.assertFalse(self.a == self.b)
         self.assertTrue(self.b == self.b)
         self.assertTrue(self.c == point(1, 2, 3))
+        self.assertFalse(self.b == self.c)
 
         # Test point subtraction
-        # TODO I can't write this test yet because we don't have a vector class
+        self.assertTrue(self.b - self.b == vector(0, 0))
+        self.assertTrue(self.b - self.a == self.a)
 
     '''
     I hate giant commented sections of code too. Don't worry, when we merge
