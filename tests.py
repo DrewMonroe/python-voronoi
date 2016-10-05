@@ -33,6 +33,7 @@ class PredicatesTestCase(unittest.TestCase):
         self.assertTrue(self.b == self.b)
         self.assertTrue(self.c == point(1, 2, 3))
         self.assertFalse(self.b == self.c)
+        self.assertFalse(self.b == (1, 2))
 
         # Test point subtraction
         self.assertTrue(self.b - self.b == vector(0, 0))
