@@ -36,3 +36,10 @@ class point:
     def __sub__(self, p):
         """TODO: We need to implement this once we have a vector class"""
         pass
+
+    def toarray(self):
+        """Return a numpy array of the components
+        This will be useful for if we need to build up additional data
+        structures from a point
+        """
+        return self._components
