@@ -36,7 +36,7 @@ class PredicatesTestCase(unittest.TestCase):
 
         # Test point subtraction
         self.assertTrue(self.b - self.b == vector(0, 0))
-        self.assertTrue(self.b - self.a == self.a)
+        self.assertTrue(self.b - self.a == vector(1, 2))
 
     '''
     I hate giant commented sections of code too. Don't worry, when we merge
