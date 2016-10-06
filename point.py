@@ -1,7 +1,7 @@
 import numpy as np
 
 
-class point:
+class Point:
     """This class stores imformation about a point in R^n"""
     def __init__(self, *components):
         """Store componements in a numpy array under the hood"""
@@ -38,9 +38,13 @@ class point:
         """TODO: We need to implement this once we have a vector class"""
         pass
 
-    def toarray(self):
+    def to_array(self):
         """Return a numpy array of the components
         This will be useful for if we need to build up additional data
         structures from a point
         """
         return self._components
+
+    def to_vector(self):
+        """Turn the point into a vector from the origin"""
+        return self - Point(*[0 for x in self])

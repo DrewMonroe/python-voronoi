@@ -2,7 +2,7 @@
 import unittest
 
 # import numpy as np
-from point import point
+from point import Point
 
 
 class PredicatesTestCase(unittest.TestCase):
@@ -10,9 +10,9 @@ class PredicatesTestCase(unittest.TestCase):
 
     def setUp(self):
         """Make some objects that are useful for most tests."""
-        self.a = point(0, 0)
-        self.b = point(1, 2)
-        self.c = point(1, 2, 3)
+        self.a = Point(0, 0)
+        self.b = Point(1, 2)
+        self.c = Point(1, 2, 3)
 
     def test_point(self):
         # Make sure that we can evaluate a point to True
@@ -20,7 +20,7 @@ class PredicatesTestCase(unittest.TestCase):
 
         # Test to see if length of a point makes sense
         self.assertTrue(len(self.c) == 3)
-        self.assertTrue(len(point(1, 2, 3, 4)) == 4)
+        self.assertTrue(len(Point(1, 2, 3, 4)) == 4)
         self.assertFalse(len(self.b) == 3)
 
         # Make sure that we can access elements of a point by index
@@ -31,14 +31,19 @@ class PredicatesTestCase(unittest.TestCase):
         # Test point equality
         self.assertFalse(self.a == self.b)
         self.assertTrue(self.b == self.b)
-        self.assertTrue(self.c == point(1, 2, 3))
+        self.assertTrue(self.c == Point(1, 2, 3))
         self.assertFalse(self.b == self.c)
         self.assertFalse(self.b == (1, 2))
 
         # Test point subtraction
-        self.assertTrue(self.b - self.b == vector(0, 0))
-        self.assertTrue(self.b - self.a == vector(1, 2))
+        self.assertTrue(self.b - self.b == Vector(0, 0))
+        self.assertTrue(self.b - self.a == Vector(1, 2))
 
+        # Test turning points into vectors
+        self.assertTrue(self.c.to_vector() == Vector(1, 2, 3))
+        self.assertTrue(self.a.to_vector() == Vector(0, 0))
+        self.assertTrue(self.b.to_vector() == Vector(1, 2))
+        self.assertFalse(self.b.to_vector() == Vector(1, 2, 0))
     '''
     I hate giant commented sections of code too. Don't worry, when we merge
     this to master with actual tests it will be fixed
