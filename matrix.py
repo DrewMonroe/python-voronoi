@@ -55,3 +55,6 @@ class Matrix:
         """Subtract this matrix with another matrix"""
         return Matrix(*[Vector(*i) for i in
                         (self._columns - other.to_array()).T])
+
+    def __eq__(self, other):
+        return np.array_equal(self._columns, other.to_array())
