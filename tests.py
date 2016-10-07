@@ -3,6 +3,8 @@ import unittest
 
 # import numpy as np
 from point import Point
+from vector import Vector
+from predicates import incircle
 
 
 class PredicatesTestCase(unittest.TestCase):
@@ -44,6 +46,15 @@ class PredicatesTestCase(unittest.TestCase):
         self.assertTrue(self.a.to_vector() == Vector(0, 0))
         self.assertTrue(self.b.to_vector() == Vector(1, 2))
         self.assertFalse(self.b.to_vector() == Vector(1, 2, 0))
+
+    def test_incircle(self):
+        self.a = Vector(1, 0)
+        self.b = Vector(0, 1)
+        self.c = Vector(-1, 0)
+        self.d = Vector(0, 0)
+        self.assertTrue(incircle(self.a, self.b, self.c, self.d) == 1)
+        self.assertTrue(incircle(self.a, self.b, self.d, self.c) == -1)
+        self.assertTrue(incircle(self.a, self.b, self.c, self.c) == 0)
     '''
     I hate giant commented sections of code too. Don't worry, when we merge
     this to master with actual tests it will be fixed
