@@ -18,7 +18,7 @@ class Matrix:
 
     def width(self):
         """Returns the width of the matrix"""
-        return len(self._colums[0])
+        return len(self._columns[0])
 
     def height(self):
         """Returns the height of the matrix"""
@@ -63,7 +63,13 @@ class Matrix:
                         (self._columns - other.to_array()).T])
 
     def __eq__(self, other):
+        """Checks if two matrices are equal"""
         return np.array_equal(self._columns, other.to_array())
 
     def transpose(self):
+        """Returns the transpose of the matrix"""
         return Matrix(*[Vector(*i) for i in self._columns])
+
+    def power(self, p):
+        """Returns a matrix to the power p"""
+        return Matrix(*[Vector(*i) for i in np.linalg.matrix_power(self._columns, p).T])
