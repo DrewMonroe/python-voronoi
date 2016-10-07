@@ -30,5 +30,4 @@ def incircle(*vectors):  # a, b, c, d):
     1 if inside, -1 if outside, and 0 if all cocircular.
     """
 
-    return (ccw(*[lift(v, norm_squared) for v in vectors]) *
-            ccw(*vectors[:-1]))  # eliminate dependence on orienation of circle
+    return ccw(*[v.lift(v.norm_squared) for v in vectors]) * ccw(*vectors[:-1])
