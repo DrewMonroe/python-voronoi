@@ -42,7 +42,7 @@ class Matrix:
         return Matrix(*[Vector(*i) for i in
                         self._columns.dot(other.to_array()).T])
 
-    def determinant(self):
+    def det(self):
         """Return determinant of matrix"""
         return np.linalg.det(self._columns)
 
