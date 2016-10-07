@@ -57,6 +57,8 @@ class Vector:
         else:
             return NotImplemented
 
+    __rmul__ = __mul__
+
     def to_array(self):
         """Return a numpy array of the components
         This will be useful for if we need to build up additional data
