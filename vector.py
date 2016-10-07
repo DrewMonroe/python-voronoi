@@ -1,5 +1,4 @@
 import numpy as np
-from numpy import linalg as LA
 
 
 class Vector:
@@ -38,20 +37,25 @@ class Vector:
     def __sub__(self, v):
         """Pointwise vector subtraction"""
         if type(self) == type(v) and len(self) == len(v):
-            return np.subtract(self._components, v)
+            return Vector(*np.subtract(self._components, v))
         else:
             return NotImplemented
 
     def __add__(self, v):
         """Pointwise vector addition"""
         if type(self) == type(v) and len(self) == len(v):
-            return np.add(self._components, v)
+            return Vector(*np.add(self._components, v))
         else:
             return NotImplemented
 
     def __mul__(self, s):
         """Scalar multiplication"""
-        return np.multiply(self._components, s)
+        if isinstance(s, (int, float)):
+            return Vector(*np.multiply(self._components, s))
+        elif type(self) == type(s) and len(self) == len(s):
+            return self.dot(s)
+        else:
+            return NotImplemented
 
     def to_array(self):
         """Return a numpy array of the components
@@ -66,10 +70,10 @@ class Vector:
 
     def norm_squared(self):
         """Returns the norm of itself squared"""
-        n = LA.norm(self._components)
-        return n*n
+        return self.dot(self)
 
     def lift(self, function=(lambda *args: 1)):
         """Lifts the vector up to a dimension based off the given function"""
-        return np.append(self._components, Vector(function(self._components)),
-                         axis=0)
+        return Vector(*np.append(self._components,
+                                 Vector(function(self._components)),
+                                 axis=0))
