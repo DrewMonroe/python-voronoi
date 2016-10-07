@@ -44,7 +44,7 @@ class Matrix:
                             np.multiply(self._columns, other)])
         elif type(self) == type(other):
             return Matrix(*[Vector(*i) for i in
-                        self._columns.dot(other.to_array()).T])
+                            self._columns.dot(other.to_array()).T])
 
     __rmul__ = __mul__
 
@@ -72,4 +72,5 @@ class Matrix:
 
     def power(self, p):
         """Returns a matrix to the power p"""
-        return Matrix(*[Vector(*i) for i in np.linalg.matrix_power(self._columns, p).T])
+        return Matrix(*[Vector(*i) for i in
+                        np.linalg.matrix_power(self._columns, p).T])
