@@ -39,7 +39,8 @@ class Matrix:
 
     def __mul__(self, other):
         """Multiply this matrix with another matrix"""
-        return Matrix(*[Vector(*i) for i in self._columns.dot(other.to_array()).T])
+        return Matrix(*[Vector(*i) for i in
+                        self._columns.dot(other.to_array()).T])
 
     def determinant(self):
         """Return determinant of matrix"""
@@ -47,8 +48,10 @@ class Matrix:
 
     def __add__(self, other):
         """Add this matrix with another matrix"""
-        return Matrix(*[Vector(*i) for i in (self._columns + other.to_array()).T])
+        return Matrix(*[Vector(*i) for i in
+                        (self._columns + other.to_array()).T])
 
     def __sub__(self, other):
         """Subtract this matrix with another matrix"""
-        return Matrix(*[Vector(*i) for i in (self._columns - other.to_array()).T])
+        return Matrix(*[Vector(*i) for i in
+                        (self._columns - other.to_array()).T])
