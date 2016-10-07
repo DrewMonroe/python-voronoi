@@ -58,3 +58,6 @@ class Matrix:
 
     def __eq__(self, other):
         return np.array_equal(self._columns, other.to_array())
+
+    def transpose(self):
+        return Matrix(*[Vector(*i) for i in self._columns])
