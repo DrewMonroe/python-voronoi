@@ -9,6 +9,8 @@ to make vectors / document how we should make vectors.
 import numpy as np
 # from scipy import linalg # supposedly faster, but doesn't have everything
 from numpy import linalg  # for accurate sign of det, hopefully
+from matrix import Matrix
+from vector import Vector
 
 
 def vector(*values):
@@ -67,9 +69,8 @@ def ccw(*vectors):
 
     Also does the scary analogous n-dimensional test.
     """
-    return sign_det(np.concatenate(
-        [lift(x, lambda arg: 1) for x in vectors],
-        axis=1))
+    m = Matrix(*[vector.lift() for vector in vectors])
+    return int(np.sign(m.det()))
 
 
 def norm_squared(column):
