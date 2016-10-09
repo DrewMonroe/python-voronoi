@@ -2,51 +2,12 @@
 import unittest
 
 # import numpy as np
-from primitives import Point
+from primitives import Point, Vector, Matrix
 
 
 class PredicatesTestCase(unittest.TestCase):
     """Unit tests for the predicates and related objects."""
 
-    def setUp(self):
-        """Make some objects that are useful for most tests."""
-        self.a = Point(0, 0)
-        self.b = Point(1, 2)
-        self.c = Point(1, 2, 3)
-
-    def test_point(self):
-        # Make sure that we can evaluate a point to True
-        self.assertTrue(self.a)
-
-        # Test to see if length of a point makes sense
-        self.assertTrue(len(self.c) == 3)
-        self.assertTrue(len(Point(1, 2, 3, 4)) == 4)
-        self.assertFalse(len(self.b) == 3)
-
-        # Make sure that we can access elements of a point by index
-        self.assertTrue(self.a[0] == 0)
-        self.assertTrue(self.c[2] == 3)
-        self.assertFalse(self.b[-1] == 10)
-
-        # Test point equality
-        self.assertFalse(self.a == self.b)
-        self.assertTrue(self.b == self.b)
-        self.assertTrue(self.c == Point(1, 2, 3))
-        self.assertFalse(self.b == self.c)
-        self.assertFalse(self.b == (1, 2))
-
-        # Test point subtraction
-        self.assertTrue(self.b - self.b == Vector(0, 0))
-        self.assertTrue(self.b - self.a == Vector(1, 2))
-
-        # Test turning points into vectors
-        self.assertTrue(self.c.to_vector() == Vector(1, 2, 3))
-        self.assertTrue(self.a.to_vector() == Vector(0, 0))
-        self.assertTrue(self.b.to_vector() == Vector(1, 2))
-        self.assertFalse(self.b.to_vector() == Vector(1, 2, 0))
-    '''
-    I hate giant commented sections of code too. Don't worry, when we merge
-    this to master with actual tests it will be fixed
     def test_as_columns(self):
         """Test the thing that joins column vectors into a matrix."""
         target = matrix([1, 2, 3],
@@ -144,6 +105,6 @@ class PredicatesTestCase(unittest.TestCase):
         self.assertTrue(equal(target, lift_matrix(base, list_test)))
         self.assertTrue(equal(target, lift_matrix(base, vector_test)))
         self.assertTrue(equal(target, lift_matrix(base, matrix_test)))
-    '''
+
 if __name__ == "__main__":
     unittest.main()

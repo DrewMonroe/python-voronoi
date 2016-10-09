@@ -142,6 +142,13 @@ class PrimitivesTestCase(unittest.TestCase):
 class PointTestCase(unittest.TestCase):
     """Unit tests for the Point class."""
 
+    def setUp(self):
+        """Make some objects that are useful for most tests."""
+        self.a = Point(0, 0)
+        self.b = Point(1, 2)
+        self.c = Point(1, 2, 3)
+
+
     def test_point_equal(self):
         """Tests if comparison of points for equality works"""
         self.assertTrue(Point(0, -9, 11.2) == Point(0, -9, 11.2))
@@ -149,12 +156,54 @@ class PointTestCase(unittest.TestCase):
         # Different location
         self.assertFalse(Point(1, 4) == Point(1, 4, 5))
 
+        # Drew's tests:
+        self.assertTrue(self.a == self.b)
+        self.assertTrue(self.b == self.b)
+        self.assertTrue(self.c == Point(1, 2, 3))
+        self.assertFalse(self.b == self.c)
+        self.assertFalse(self.b == (1, 2))
 
-    def test_weird_edge_cases(self):
+
+    def test_misc_niceties(self):
         """I don't want  the empty point to be a thing. You may disagree."""
         with self.assertRaises(ValueError):
             Point() # Try to make an empty point.
 
+        # Make sure that we can evaluate a point to True
+        self.assertTrue(self.a)
+
+
     def test_lift(self):
         """Make sure lifting works nicely. TODO"""
         pass
+
+    def test_length(self):
+        """Test to see if length of a point makes sense"""
+        self.assertTrue(len(self.c) == 3)
+        self.assertTrue(len(Point(1, 2, 3, 4)) == 4)
+        self.assertFalse(len(self.b) == 3)
+
+    def test_indexing(self):
+        """Make sure that we can access elements of a point by index"""
+        self.assertTrue(self.a[0] == 0)
+        self.assertTrue(self.c[2] == 3)
+        self.assertFalse(self.b[-1] == 10)
+
+        with self.assertRaises(Exception):
+            # I want a warning when I accidentally try to set values:
+            self.b[-1] = 10
+
+    def test_subtraction(self):
+        """Test point subtraction"""
+        self.assertTrue(self.b - self.b == Vector(0, 0))
+        self.assertTrue(self.b - self.a == Vector(1, 2))
+
+    def test_to_vector(self):
+        """Test turning points into vectors"""
+        self.assertEqual(self.c.to_vector(), Vector(1, 2, 3))
+        self.assertEqual(self.a.to_vector(), Vector(0, 0))
+        self.assertEqual(self.b.to_vector(), Vector(1, 2))
+        self.assertNotEqual(self.b.to_vector(), Vector(1, 2, 0))
+
+if __name__ == "__main__":
+    unittest.main()
