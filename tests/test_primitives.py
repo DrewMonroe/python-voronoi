@@ -1,9 +1,10 @@
-import unittest
+"""Unit tests for the classes defined in the primitives package"""
 
+import unittest
+import random # only used where I didn't feel like picking arbitrary numbers
 
 from primitives import Point, Vector
 
-import random # only used where I didn't feel like picking arbitrary numbers
 
 class PrimitivesTestCase(unittest.TestCase):
     """Unit tests for the Vector class."""
@@ -17,7 +18,6 @@ class PrimitivesTestCase(unittest.TestCase):
         # is the absolute worst.
         self.v1 = Vector(*[(random.random() - 0.5) * 10 for i in range(10)])
         self.v2 = Vector(*[(random.random() - 0.5) * 10 for i in range(10)])
-        self.v3 = Vector(*[(random.random() - 0.5) * 10 for i in range(10)])
         self.zero_v = Vector(*([0] * 10)) # 10-dimensional 0 vector
 
     def test_vector_equal(self):
@@ -39,29 +39,17 @@ class PrimitivesTestCase(unittest.TestCase):
         # So I want to know if I make one by accident.
         with self.assertRaises(ValueError):
             Vector() # make an empty vector
-        
+
 
     def test_vector_arithmetic(self):
         """Tests if vector addition works properly."""
-
-        # Some vectors, for when the particular values don't matter.
-        # Note that if v1, v2, or self.v3 is the zero vector, tests will
-        # fail despite correct behavior.
-        # But that's pretty remarkably improbable unless random.random
-        # is the absolute worst.
-        v1 = vector(*[(random.random() - 0.5) * 10 for i in range(10)])
-        v2 = vector(*[(random.random() - 0.5) * 10 for i in range(10)])
-        self.v3 = vector(*[(random.random() - 0.5) * 10 for i in range(10)])
-        zero_v = vector(*([0] * 10))
-
-        # Test addition
 
         # Result of addition is a vector
         self.assertIsInstance(self.v1 + self.v2, Vector)
 
         # Just a sanity-check example.
         self.assertEqual(Vector(1, 4, 5, 6) + Vector(4, 10, -3, 0),
-                        Vector(5, 14, 2, 6))
+                         Vector(5, 14, 2, 6))
 
         # Make sure this doesn't modify the vectors somehow
         self.assertNotEqual(self.v1 + self.v2, self.v1)
@@ -72,13 +60,15 @@ class PrimitivesTestCase(unittest.TestCase):
         self.assertEqual(self.v1 + self.zero_v, self.v1)
 
         # Adding vectors from different vector spaces should raise errors
-        with self.assertRaises(ValueError):
-            Vector(1, 2, 3) + Vector(1, 2)
+        # Big + small:
+        self.assertRaises(ValueError, Vector(1, 2, 3).__add__, Vector(1, 2))
+        # small + Big:
+        self.assertRaises(ValueError, Vector(1, 2).__add__, Vector(1, 2, 3))
 
         # Adding totally weird stuff to a vector should also raise errors
-        with self.assertRaises(Exception):
-            # I'm happy as long as this raises something at all
-            Vector(1, 2, 3) + None
+        # It doesn't matter what error, really.
+        self.assertRaises(Exception, Vector(1, 2, 3).__add__, None)
+
 
     def test_vector_subtraction(self):
         """Tests if subtraction works properly"""
@@ -88,38 +78,41 @@ class PrimitivesTestCase(unittest.TestCase):
 
         # A few simple cases that should pass
         self.assertEqual(Vector(1, 3) - Vector(0, 3), Vector(1, 0))
-        self.assertEqual(Vector(500) - Vector(400), Vector(300))
+        self.assertEqual(Vector(500) - Vector(400), Vector(100))
+
+        # Should only work on vectors of like sizes
+        # big - small
+        self.assertRaises(ValueError, Vector(1, 2, 3).__sub__, Vector(1, 2))
+        # small - big
+        self.assertRaises(ValueError, Vector(1, 2).__sub__, Vector(1, 2, 3))
 
         # A few things could go horribly, horribly wrong such
         # that the following test fails:
+        # Unfortunately it seems to be failing just because of floating
+        # point arithmetic.
         self.assertEqual(self.v2 - self.v1 + self.v1, self.v1 - self.v1 + self.v2)
 
-        # Should only work on vectors of like sizes
-        with self.assertRaises(ValueError):
-            Vector(1, 2, 3) - Vector(1, 2) # big - small
 
-        with self.assertRaises(ValueError):
-            Vector(1, 2)  - Vector(1, 2, 3) # small - big
+    def test_scalar_multiplication(self):
+        """There should be some way to multiply vectors by scalars."""
 
-    # def test_scalar_multiplication(self):
-    #     """There should be some way to multiply vectors by scalars."""
+        self.assertEqual(1 * self.v1, self.v1 * 1)
+        self.assertEqual(0 * self.v1, self.zero_v)
+        self.assertIsInstance(5 * self.v1, Vector)
 
     def test_dot_products(self):
         """Tests vector dot products"""
 
         v1 = self.v1 # The code looks so much better with these short
         v2 = self.v2
-        v3 = self.v3
         zero_v = self.zero_v
 
         # Symmetric
         self.assertEqual(v1.dot(v2), v2.dot(v1))
 
-        # # Associative
-        # self.assertEqual(v1.dot(v2.scale(5)),
-        #                  v1.dot(v2).scale(5))
-        # TODO - figure out our canonical way to
-        # multiply a vector by a scalar here.
+        # Associative with scalar multiplication
+        self.assertEqual(v1.dot(v2 * 5),
+                         v1.dot(v2) * 5)
 
         # Norm >= 0
         self.assertTrue(v1.dot(v1) >= 0)
@@ -141,14 +134,10 @@ class PrimitivesTestCase(unittest.TestCase):
         self.assertEqual(Vector(*[i for i in self.v1]), self.v1)
 
     def test_indexing(self):
-        """Make sure getting/setting by index works"""
-
-        # Make sure OOP still works properly
-        original = Vector(1, 2, 3)
-        same_object = original
-        original[0] = 4
-        self.assertEqual(original, same_object)
-        # Honestly... I don't know if we want a set-item.
+        """Make sure accessing by index works"""
+        my_vector = Vector(1, 2, 3, 4, 5)
+        self.assertEqual(my_vector[0], 1)
+        self.assertEqual(my_vector[-1], 5)
 
 class PointTestCase(unittest.TestCase):
     """Unit tests for the Point class."""
@@ -162,9 +151,9 @@ class PointTestCase(unittest.TestCase):
 
 
     def test_weird_edge_cases(self):
-        """I don't want  the empty point to be a thing. Sue me."""
+        """I don't want  the empty point to be a thing. You may disagree."""
         with self.assertRaises(ValueError):
-            Point() # Try to make an empty point. 
+            Point() # Try to make an empty point.
 
     def test_lift(self):
         """Make sure lifting works nicely. TODO"""
