@@ -16,10 +16,10 @@ class PrimitivesTestCase(unittest.TestCase):
         # fail despite correct behavior.
         # But that's pretty remarkably improbable unless random.random
         # is the absolute worst.
-        self.v1 = vector(*[(random.random() - 0.5) * 10 for i in range(10)])
-        self.v2 = vector(*[(random.random() - 0.5) * 10 for i in range(10)])
-        self.v3 = vector(*[(random.random() - 0.5) * 10 for i in range(10)])
-        self.zero_v = vector(*([0] * 10)) # 10-dimensional 0 vector
+        self.v1 = Vector(*[(random.random() - 0.5) * 10 for i in range(10)])
+        self.v2 = Vector(*[(random.random() - 0.5) * 10 for i in range(10)])
+        self.v3 = Vector(*[(random.random() - 0.5) * 10 for i in range(10)])
+        self.zero_v = Vector(*([0] * 10)) # 10-dimensional 0 vector
 
     def test_vector_equal(self):
         """Tests comparison of vectors for equality"""
