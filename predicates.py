@@ -29,5 +29,6 @@ def incircle(*vectors):  # a, b, c, d):
     previous arguments?
     1 if inside, -1 if outside, and 0 if all cocircular.
     """
-
-    return ccw(*[v.lift(v.norm_squared) for v in vectors]) * ccw(*vectors[:-1])
+    m = Matrix(*[vector.lift(lambda v: v.norm_squared())
+                 .lift() for vector in vectors])
+    return int(np.sign(m.det()))

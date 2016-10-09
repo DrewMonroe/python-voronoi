@@ -77,4 +77,5 @@ class Vector:
 
     def lift(self, function=(lambda *args: 1)):
         """Lifts the vector up to a dimension based off the given function"""
-        return Vector(*np.append(self._components, Vector(function()), axis=0))
+        return Vector(*np.append(self._components, Vector(function(self)),
+                      axis=0))
