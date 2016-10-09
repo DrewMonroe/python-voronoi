@@ -1,8 +1,8 @@
-"""Unittests for the predicates"""
+"""Unittests for the predicates. Some of these are relics from an older design."""
 import unittest
 
 # import numpy as np
-from point import Point
+from primitives import Point
 
 
 class PredicatesTestCase(unittest.TestCase):

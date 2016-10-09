@@ -1,8 +1,7 @@
 import unittest
 
 
-from point import Point
-from vector import Vector
+from primitives import Point, Vector
 
 import random # only used where I didn't feel like picking arbitrary numbers
 

@@ -1,5 +1,6 @@
-import numpy as np
+#!/usr/bin/env python3
 
+import numpy as np
 
 class Vector:
     """This class stores imformation about a Vector in R^n"""
