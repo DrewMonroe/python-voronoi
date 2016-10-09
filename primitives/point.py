@@ -33,8 +33,8 @@ class Point:
     def __eq__(self, p):
         """Equality if points have the same components in the same order"""
         return type(self) == type(p) and\
-               len(p) == len(self) and\
-               all([p[i] == self[i] for i in range(len(p))])
+            len(p) == len(self) and\
+            all([p[i] == self[i] for i in range(len(p))])
 
     def __sub__(self, p):
         """TODO: We need to implement this once we have a vector class"""

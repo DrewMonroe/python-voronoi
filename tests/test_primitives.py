@@ -1,7 +1,7 @@
 """Unit tests for the classes defined in the primitives package"""
 
 import unittest
-import random # only used where I didn't feel like picking arbitrary numbers
+import random  # only used where I didn't feel like picking arbitrary numbers
 
 from primitives import Point, Vector
 
@@ -18,7 +18,7 @@ class PrimitivesTestCase(unittest.TestCase):
         # is the absolute worst.
         self.v1 = Vector(*[(random.random() - 0.5) * 10 for i in range(10)])
         self.v2 = Vector(*[(random.random() - 0.5) * 10 for i in range(10)])
-        self.zero_v = Vector(*([0] * 10)) # 10-dimensional 0 vector
+        self.zero_v = Vector(*([0] * 10))  # 10-dimensional 0 vector
 
     def test_vector_equal(self):
         """Tests comparison of vectors for equality"""
@@ -27,7 +27,6 @@ class PrimitivesTestCase(unittest.TestCase):
         self.assertFalse(Vector(0, -9, 1600002) == Vector(0, -8, 1600002))
         # Different values should not be equal
         self.assertFalse(Vector(1, 4) == Vector(1, 4, 5))
-
 
     def test_weird_edge_cases(self):
         """Tests stuff that is just plain weird but might matter.
@@ -38,8 +37,7 @@ class PrimitivesTestCase(unittest.TestCase):
         # before, and in fact I never expect to make one on purpose.
         # So I want to know if I make one by accident.
         with self.assertRaises(ValueError):
-            Vector() # make an empty vector
-
+            Vector()
 
     def test_vector_arithmetic(self):
         """Tests if vector addition works properly."""
@@ -69,7 +67,6 @@ class PrimitivesTestCase(unittest.TestCase):
         # It doesn't matter what error, really.
         self.assertRaises(Exception, Vector(1, 2, 3).__add__, None)
 
-
     def test_vector_subtraction(self):
         """Tests if subtraction works properly"""
 
@@ -90,8 +87,8 @@ class PrimitivesTestCase(unittest.TestCase):
         # that the following test fails:
         # Unfortunately it seems to be failing just because of floating
         # point arithmetic.
-        self.assertEqual(self.v2 - self.v1 + self.v1, self.v1 - self.v1 + self.v2)
-
+        self.assertEqual(self.v2 - self.v1 + self.v1,
+                         self.v1 - self.v1 + self.v2)
 
     def test_scalar_multiplication(self):
         """There should be some way to multiply vectors by scalars."""
@@ -103,7 +100,7 @@ class PrimitivesTestCase(unittest.TestCase):
     def test_dot_products(self):
         """Tests vector dot products"""
 
-        v1 = self.v1 # The code looks so much better with these short
+        v1 = self.v1  # The code looks so much better with these short
         v2 = self.v2
         zero_v = self.zero_v
 
@@ -139,6 +136,7 @@ class PrimitivesTestCase(unittest.TestCase):
         self.assertEqual(my_vector[0], 1)
         self.assertEqual(my_vector[-1], 5)
 
+
 class PointTestCase(unittest.TestCase):
     """Unit tests for the Point class."""
 
@@ -147,7 +145,6 @@ class PointTestCase(unittest.TestCase):
         self.a = Point(0, 0)
         self.b = Point(1, 2)
         self.c = Point(1, 2, 3)
-
 
     def test_point_equal(self):
         """Tests if comparison of points for equality works"""
@@ -163,15 +160,13 @@ class PointTestCase(unittest.TestCase):
         self.assertFalse(self.b == self.c)
         self.assertFalse(self.b == (1, 2))
 
-
     def test_misc_niceties(self):
         """I don't want  the empty point to be a thing. You may disagree."""
         with self.assertRaises(ValueError):
-            Point() # Try to make an empty point.
+            Point()  # Try to make an empty point.
 
         # Make sure that we can evaluate a point to True
         self.assertTrue(self.a)
-
 
     def test_lift(self):
         """Make sure lifting works nicely. TODO"""

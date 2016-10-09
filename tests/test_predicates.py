@@ -1,8 +1,13 @@
-"""Unittests for the predicates. Some of these are relics from an older design."""
+"""Unittests for the predicates.
+
+Some of these are relics from an older design.
+"""
+
 import unittest
 
 from primitives import Point, Vector, Matrix
 from predicates import incircle
+
 
 class PredicatesTestCase(unittest.TestCase):
     """Unit tests for the predicates and related objects."""
@@ -58,7 +63,6 @@ class PredicatesTestCase(unittest.TestCase):
         # Finitely faraway pt is in the clockwise (inside-out) unit circle
         self.assertEqual(incircle(self.r2west, self.r2north, self.r2east,
                                   r2far_east), 1)
-
 
     '''
     I hate giant commented sections of code too. Don't worry, when we merge
