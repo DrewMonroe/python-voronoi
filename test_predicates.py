@@ -2,13 +2,15 @@
 import unittest
 
 #import numpy as np
-from predicates import as_columns
-from predicates import ccw
-from predicates import equal
-from predicates import incircle
-from predicates import lift_matrix
-from predicates import matrix
-from predicates import vector
+# from predicates import as_columns
+# from predicates import ccw
+# from predicates import equal
+# from predicates import incircle
+# from predicates import lift_matrix
+# from predicates import matrix
+# from predicates import vector
+from point import Point # fix these imports, of course
+from vector import Vector
 
 class PredicatesTestCase(unittest.TestCase):
     """Unit tests for the predicates and related objects."""
@@ -16,16 +18,16 @@ class PredicatesTestCase(unittest.TestCase):
     def setUp(self):
         """Make some objects that are useful for most tests."""
         # Used to test incircle and foo
-        self.r2north = vector(0, 1)
-        self.r2east = vector(1, 0)
-        self.r2south = vector(0, -1)
-        self.r2west = vector(-1, 0)
-        self.r2orig = vector(0, 0)
+        self.r2north = Vector(0, 1)
+        self.r2east = Vector(1, 0)
+        self.r2south = Vector(0, -1)
+        self.r2west = Vector(-1, 0)
+        self.r2orig = Vector(0, 0)
 
     def test_equal(self):
         """Tests the predicate for equality of vectors/matrices."""
-        self.assertTrue(equal(vector(0, -9, 1600002),
-                              vector(0, -9, 1600002)))
+        self.assertTrue(equal(Vector(0, -9, 1600002),
+                              Vector(0, -9, 1600002)))
         self.assertTrue(equal(matrix([0, 1], [-1, -2]),
                               matrix([0, 1], [-1, -2])))
         self.assertFalse(equal(matrix([0, 1], [-1, -2]),
@@ -39,35 +41,35 @@ class PredicatesTestCase(unittest.TestCase):
                                matrix([0, 1, -1], # paranoia seems wise
                                       [-2, 0, 0],
                                       [0, 0, 0])))
-        self.assertFalse(equal(vector(0, 1, 2), vector(1, 2)))
+        self.assertFalse(equal(Vector(0, 1, 2), Vector(1, 2)))
 
 
-    def test_as_columns(self):
-        """Test the thing that joins column vectors into a matrix."""
-        target = matrix([1, 2, 3],
-                        [4, 5, 6],
-                        [7, 8, 9])
-        col1 = vector(1, 4, 7)
-        col2 = vector(2, 5, 8)
-        col3 = vector(3, 6, 9)
-        self.assertTrue(equal(target, as_columns(col1, col2, col3)))
+    # def test_as_columns(self):
+    #     """Test the thing that joins column vectors into a matrix."""
+    #     target = matrix([1, 2, 3],
+    #                     [4, 5, 6],
+    #                     [7, 8, 9])
+    #     col1 = Vector(1, 4, 7)
+    #     col2 = Vector(2, 5, 8)
+    #     col3 = Vector(3, 6, 9)
+    #     self.assertTrue(equal(target, as_columns(col1, col2, col3)))
 
 
-    def test_vector(self):
+    def test_Vector(self):
         """Test our standard function for making column vectors"""
-        self.assertEqual(len(vector(0, 1, 2)), 3)
-        self.assertTrue(vector(0, 1, 2)) # might fail. numpy is a pain.
-        # self.assertTrue(vector(0, 1, 2).any()) # feels like admitting defeat
+        self.assertEqual(len(Vector(0, 1, 2)), 3)
+        self.assertTrue(Vector(0, 1, 2)) # might fail. numpy is a pain.
+        # self.assertTrue(Vector(0, 1, 2).any()) # feels like admitting defeat
         # depends how we want to use it:
-        # self.assertTrue(vector(0, 0, 0).any())
+        # self.assertTrue(Vector(0, 0, 0).any())
 
     def test_ccw(self):
         """Right now this only tests ccw for 1 and 2 dimensions."""
 
         # one-dimensional test.
 
-        one_dim_high = vector(1)
-        one_dim_low = vector(0)
+        one_dim_high = Vector(1)
+        one_dim_low = Vector(0)
         # I don't much care which way is negative, but one had better
         # be positive and the other negative. And they'd better be
         # ints.
@@ -98,7 +100,7 @@ class PredicatesTestCase(unittest.TestCase):
     def test_incircle(self):
         """Test the incircle predicate (currently in the plane only)"""
 
-        r2far_east = vector(50, -0.5)
+        r2far_east = Vector(50, -0.5)
 
         # circle of radius 0... ought to be 0 (co-circular)
         self.assertEqual(incircle(self.r2east, self.r2east, self.r2east,
@@ -132,8 +134,9 @@ class PredicatesTestCase(unittest.TestCase):
         # It will be nice if we can just throw whatever data type makes
         # sense into this function, so let's make sure that happens.
         list_test = [6, 7, 8]
-        vector_test = vector(*list_test)
+        vector_test = Vector(*list_test)
         matrix_test = matrix(list_test)
         self.assertTrue(equal(target, lift_matrix(base, list_test)))
         self.assertTrue(equal(target, lift_matrix(base, vector_test)))
         self.assertTrue(equal(target, lift_matrix(base, matrix_test)))
+
