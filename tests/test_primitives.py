@@ -154,7 +154,7 @@ class PointTestCase(unittest.TestCase):
         self.assertFalse(Point(1, 4) == Point(1, 4, 5))
 
         # Drew's tests:
-        self.assertTrue(self.a == self.b)
+        self.assertFalse(self.a == self.b)
         self.assertTrue(self.b == self.b)
         self.assertTrue(self.c == Point(1, 2, 3))
         self.assertFalse(self.b == self.c)
