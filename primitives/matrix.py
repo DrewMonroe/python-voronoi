@@ -8,7 +8,7 @@ class Matrix:
     """This class represents a column matrix"""
     def __init__(self, *vectors):
         """Store vectors of matrix in numpy array"""
-        self._columns = np.array([row.to_array() for row in vectors]).T
+        self._columns = np.array(vectors).T
 
     def __repr__(self):
         """Return numpy array's str."""
@@ -72,7 +72,7 @@ class Matrix:
         """Returns the transpose of the matrix"""
         return Matrix(*[Vector(*i) for i in self._columns])
 
-    def power(self, p):
+    def __pow__(self, p):
         """Returns a matrix to the power p"""
         return Matrix(*[Vector(*i) for i in
                         np.linalg.matrix_power(self._columns, p).T])
