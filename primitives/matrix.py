@@ -1,5 +1,7 @@
+#!/usr/bin/env python3
+
 import numpy as np
-from vector import Vector
+from primitives.vector import Vector
 
 
 class Matrix:
