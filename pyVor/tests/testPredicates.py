@@ -5,8 +5,8 @@ Some of these are relics from an older design.
 
 import unittest
 
-from primitives import Point, Vector, Matrix
-from predicates import incircle
+from pyVor.primitives import Point, Vector, Matrix
+from pyVor.predicates import incircle
 
 
 class PredicatesTestCase(unittest.TestCase):

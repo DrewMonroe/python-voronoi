@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import numpy as np
-from primitives.vector import Vector
+from pyVor.primitives.vector import Vector
 
 
 class Matrix:
