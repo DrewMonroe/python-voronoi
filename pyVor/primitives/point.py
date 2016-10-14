@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import numpy as np
+from pyVor.primitives.vector import Vector
 
 
 class Point:
@@ -37,8 +38,10 @@ class Point:
             all([p[i] == self[i] for i in range(len(p))])
 
     def __sub__(self, p):
-        """TODO: We need to implement this once we have a vector class"""
-        pass
+        """We need to implement this once we have a vector class"""
+        if len(self) != len(p):
+            raise ValueError('Dimension mismatch')
+        return Vector(*[x - y for x, y in zip(self, p)])
 
     def to_array(self):
         """Return a numpy array of the components
@@ -50,3 +53,8 @@ class Point:
     def to_vector(self):
         """Turn the point into a vector from the origin"""
         return self - Point(*[0 for x in self])
+
+    def lift(self, function=lambda *args: 1):
+        """Lifts a point up to a dimension based on the given function"""
+        return Point(*np.append(self._components, Point(function(self)),
+                     axis=0))
