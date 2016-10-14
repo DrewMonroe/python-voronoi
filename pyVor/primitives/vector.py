@@ -2,6 +2,7 @@
 
 import numpy as np
 
+
 class Vector:
     """This class stores imformation about a Vector in R^n"""
     def __init__(self, *components):

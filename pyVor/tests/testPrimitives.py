@@ -3,7 +3,7 @@
 import unittest
 import random  # only used where I didn't feel like picking arbitrary numbers
 
-from primitives import Point, Vector
+from pyVor.primitives import Point, Vector
 
 
 class PrimitivesTestCase(unittest.TestCase):

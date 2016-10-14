@@ -9,8 +9,8 @@ to make vectors / document how we should make vectors.
 import numpy as np
 # from scipy import linalg # supposedly faster, but doesn't have everything
 from numpy import linalg  # for accurate sign of det, hopefully
-from primitives.matrix import Matrix
-from primitives.vector import Vector
+from pyVor.primitives import Matrix
+from pyVor.primitives import Vector
 
 
 def ccw(*vectors):
