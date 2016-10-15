@@ -231,8 +231,6 @@ class PointTestCase(unittest.TestCase):
 
     def test_lift(self):
         """Make sure lifting works nicely."""
-        self.assertTrue(self.a.lift() == Point(0, 0, 1))
-        self.assertTrue(self.b.lift() == Point(1, 2, 1))
 
         # Define a function to use for testing
         def f(x):
@@ -240,6 +238,9 @@ class PointTestCase(unittest.TestCase):
         self.assertTrue(self.b.lift(f) == Point(1, 2, 2))
         self.assertFalse(self.c.lift(f) == Point(1, 2, 3, 4))
         self.assertFalse(self.c.lift(f) == Point(1, 2, 3))
+
+        # Make sure that lifting a Point returns a Point
+        self.assertTrue(type(self.b.lift(f)) == Point)
 
     def test_length(self):
         """Test to see if length of a point makes sense"""
