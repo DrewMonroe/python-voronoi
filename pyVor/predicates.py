@@ -24,11 +24,12 @@ def ccw(*vectors):
     return int(np.sign(m.det()))
 
 
-def incircle(*vectors):  # a, b, c, d):
+def incircle(*points):  # a, b, c, d):
     """In R^2, is the last argument inside the circle defined by the
     previous arguments?
     1 if inside, -1 if outside, and 0 if all cocircular.
     """
+    vectors = [p - Vector(*[0 for x in p]) for p in points]
     m = Matrix(*[vector.lift(lambda v: v.norm_squared())
                  .lift() for vector in vectors])
     return int(np.sign(m.det()))

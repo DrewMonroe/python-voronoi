@@ -54,7 +54,7 @@ class PredicatesTestCase(unittest.TestCase):
                                      self.r2orig))
         self.assertNotEqual(incircle(self.r2east, self.r2north, self.r2west,
                                      self.r2orig),
-                            incircle(self.r2west, self.r2east, self.r2north,
+                            incircle(self.r2north, self.r2east, self.r2west,
                                      self.r2orig))
 
         # Finitely faraway pt not in (counterclockwise) unit circle
