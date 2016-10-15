@@ -8,6 +8,17 @@ class Matrix:
     """This class represents a column matrix"""
     def __init__(self, *vectors):
         """Store vectors of matrix in numpy array"""
+
+        # Make sure an empty matrix doesn't exist
+        if not vectors:
+            raise ValueError
+
+        # Raise an error if the vectors have different dimensions
+        if not all([len(vectors[i]) == len(vectors[i + 1])
+                   for i in range(0, len(vectors) - 1)]):
+            raise ValueError("Dimension mismatch")
+
+        # Otherwise proceed as normal and make a Matrix
         self._columns = np.array(vectors).T
 
     def __repr__(self):

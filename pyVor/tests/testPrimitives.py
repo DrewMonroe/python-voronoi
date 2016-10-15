@@ -2,7 +2,7 @@
 
 import unittest
 
-from pyVor.primitives import Point, Vector
+from pyVor.primitives import Point, Vector, Matrix
 
 
 class VectorTestCase(unittest.TestCase):
@@ -270,6 +270,47 @@ class PointTestCase(unittest.TestCase):
         self.assertEqual(self.a.to_vector(), Vector(0, 0))
         self.assertEqual(self.b.to_vector(), Vector(1, 2))
         self.assertNotEqual(self.b.to_vector(), Vector(1, 2, 0))
+
+
+class MatrixTestCase(unittest.TestCase):
+    """Unit tests for the Matrix class"""
+
+    def setUp(self):
+        """Set up some Vectors and Matrices"""
+        self.v1 = Vector(1, 2, 3)
+        self.v2 = Vector(1, 1, 1)
+        self.v3 = Vector(9, 9)
+        self.v4 = Vector(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+        self.zero = Vector(0, 0, 0)
+        self.m1 = Matrix(self.v1, self.v2, self.zero)
+        self.m2 = Matrix(self.v1, self.v2)
+        self.m3 = Matrix(self.v3, self.v3)
+
+    def test_matrix_init(self):
+        """Make sure we cannot initialize matrices that don't make sense"""
+        # Make sure the empty matrix can't exist
+        with self.assertRaises(ValueError):
+            Matrix()
+
+        # Ensure failure if the vectors have different dimensions
+        with self.assertRaises(ValueError):
+            Matrix(self.v1, self.v2, self.v4)
+        with self.assertRaises(ValueError):
+            Matrix(self.v4, self.zero)
+        with self.assertRaises(ValueError):
+            Matrix(self.v1, self.v4, self.zero)
+
+    def test_matrix_width(self):
+        """Tests for matrix width"""
+        self.assertTrue(self.m1.width() == 3)
+        self.assertTrue(self.m2.width() == 2)
+
+    def test_matrix_height(self):
+        """Tests for matrix height"""
+        self.assertTrue(self.m1.height() == 3)
+        self.assertTrue(self.m2.height() == 3)
+        self.assertTrue(self.m3.height() == 2)
+
 
 if __name__ == "__main__":
     unittest.main()
