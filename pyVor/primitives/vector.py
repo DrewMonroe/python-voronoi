@@ -68,7 +68,7 @@ class Vector:
         This will be useful for if we need to build up additional data
         structures from a vector
         """
-        return self._components
+        return [x for x in self]
 
     def dot(self, v):
         """"Returns the dot product with another vector"""

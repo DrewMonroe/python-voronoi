@@ -87,3 +87,10 @@ class Matrix:
         """Returns a matrix to the power p"""
         return Matrix(*[Vector(*i) for i in
                         np.linalg.matrix_power(self._columns, p).T])
+
+    def inverse(self):
+        """Returns a new matrix that is the inverse of the given matrix"""
+        m = np.matrix([v for v in self])
+        print(m)
+        z = np.linalg.inv(m)
+        return Matrix(*[x for x in [np.squeeze(np.asarray(z[i])) for i in range(len(z))]])
