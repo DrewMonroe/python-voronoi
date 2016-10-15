@@ -75,7 +75,7 @@ class Vector:
         return np.dot(self._components, v)
 
     def norm_squared(self):
-        """Returns the norm of itself squared"""
+        """Returns the norm of the vector, squared"""
         return self.dot(self)
 
     def lift(self, function=(lambda *args: 1)):
