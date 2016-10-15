@@ -59,13 +59,16 @@ class PrimitivesTestCase(unittest.TestCase):
 
         # Adding vectors from different vector spaces should raise errors
         # Big + small:
-        self.assertRaises(ValueError, Vector(1, 2, 3).__add__, Vector(1, 2))
+        with self.assertRaises(ValueError):
+            Vector(1, 2, 3) + Vector(1, 2)
         # small + Big:
-        self.assertRaises(ValueError, Vector(1, 2).__add__, Vector(1, 2, 3))
+        with self.assertRaises(ValueError):
+            Vector(1, 2) + Vector(1, 2, 3)
 
         # Adding totally weird stuff to a vector should also raise errors
         # It doesn't matter what error, really.
-        self.assertRaises(Exception, Vector(1, 2, 3).__add__, None)
+        with self.assertRaises(Exception):
+            Vector(1, 2, 3) + None
 
     def test_vector_subtraction(self):
         """Tests if subtraction works properly"""
@@ -79,9 +82,11 @@ class PrimitivesTestCase(unittest.TestCase):
 
         # Should only work on vectors of like sizes
         # big - small
-        self.assertRaises(ValueError, Vector(1, 2, 3).__sub__, Vector(1, 2))
+        with self.assertRaises(ValueError):
+            Vector(1, 2, 3) - Vector(1, 2)
         # small - big
-        self.assertRaises(ValueError, Vector(1, 2).__sub__, Vector(1, 2, 3))
+        with self.assertRaises(ValueError):
+            Vector(1, 2) - Vector(1, 2, 3)
 
         # A few things could go horribly, horribly wrong such
         # that the following test fails:
