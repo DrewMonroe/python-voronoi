@@ -282,9 +282,17 @@ class MatrixTestCase(unittest.TestCase):
         self.v3 = Vector(9, 9)
         self.v4 = Vector(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
         self.zero = Vector(0, 0, 0)
+        self.v5 = Vector(1, 2)
+        self.v6 = Vector(3, 4)
+        self.v7 = Vector(5, 6)
+        self.v8 = Vector(7, 8)
+        self.v9 = Vector(4, 5, 6)
         self.m1 = Matrix(self.v1, self.v2, self.zero)
         self.m2 = Matrix(self.v1, self.v2)
         self.m3 = Matrix(self.v3, self.v3)
+        self.m4 = Matrix(self.v5, self.v6)
+        self.m5 = Matrix(self.v7, self.v8)
+        self.m6 = Matrix(self.v1, self.v9, self.v2)
 
     def test_matrix_init(self):
         """Make sure we cannot initialize matrices that don't make sense"""
@@ -311,6 +319,67 @@ class MatrixTestCase(unittest.TestCase):
         self.assertTrue(self.m2.height() == 3)
         self.assertTrue(self.m3.height() == 2)
 
+    def test_matrix_get(self):
+        """Test for getting vectors of a matrix"""
+        self.assertTrue(self.m1[0] == self.v1)
+        self.assertTrue(self.m1[1] == self.v2)
+        self.assertTrue(self.m1[2] == self.zero)
+
+    def test_matrix_iteration(self):
+        """Test iteration of a matrix"""
+        orig_list = [self.v1, self.v2, self.zero]
+        other_list = [vector for vector in self.m1]
+        self.assertTrue(orig_list == other_list)
+
+    def test_matrix_multiplication(self):
+        """Tests for matrix multiplication"""
+        result1 = Matrix(Vector(23, 34), Vector(31, 46))
+        self.assertTrue(self.m4 * self.m5 == result1)
+        result2 = Matrix(Vector(3, 4, 5), Vector(9, 13, 17), Vector(2, 3, 4))
+        self.assertTrue(self.m1 * self.m6 == result2)
+
+    def test_scalar_multiplication(self):
+        """Tests for multiplication of a matrix and a scalar"""
+        result1 = Matrix(Vector(2, 4, 6), Vector(2, 2, 2), Vector(0, 0, 0))
+        self.assertTrue(2 * self.m1 == result1)
+        self.assertTrue(2 * self.m1 == self.m1 * 2)
+
+    def test_determinant(self):
+        """Tests for calculating determinant of matrix"""
+        self.assertTrue(self.m1.det() == 0)
+        self.assertAlmostEqual(self.m5.det(), -2.0)
+        # almostEqual to account for floating point
+
+    def test_add_matrix(self):
+        """Tests for addition of two matrices"""
+        result1 = Matrix(Vector(2, 4, 6), Vector(5, 6, 7), Vector(1, 1, 1))
+        self.assertTrue(self.m1 + self.m6 == result1)
+
+    def test_subtract_matrix(self):
+        """Tests for subtraction of two matrices"""
+        result1 = Matrix(Vector(0, 0, 0), Vector(-3, -4, -5), Vector(-1, -1, -1))
+        zero_matrix = Matrix(Vector(0, 0, 0), Vector(0, 0, 0), Vector(0, 0, 0))
+        self.assertTrue(self.m1 - self.m6 == result1)
+        self.assertTrue(self.m1 - self.m1 == zero_matrix)
+
+    def test_equal(self):
+        """Tests for equality of matrices"""
+        self.assertTrue(self.m1 == self.m1)
+        self.assertFalse(self.m1 == self.m6)
+        self.assertFalse(self.m1 == self.m2)
+
+    def test_transpose(self):
+        """Tests for transpose of a matrix"""
+        result1 = Matrix(Vector(1, 1, 0), Vector(2, 1, 0), Vector(3, 1, 0))
+        result2 = Matrix(Vector(1, 4, 1), Vector(2, 5, 1), Vector(3, 6, 1))
+        self.assertTrue(self.m1.transpose() == result1)
+        self.assertTrue(self.m6.transpose() == result2)
+
+    def test_matrix_power(self):
+        """Tests for matrices to a power"""
+        result1 = Matrix(Vector(3, 4, 5), Vector(2, 3, 4), Vector(0, 0, 0))
+        self.assertTrue(self.m1 ** 2 == result1)
+        self.assertTrue(self.m1 * self.m1 * self.m1 == self.m1 ** 3)
 
 if __name__ == "__main__":
     unittest.main()

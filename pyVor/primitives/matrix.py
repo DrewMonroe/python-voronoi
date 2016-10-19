@@ -54,7 +54,7 @@ class Matrix:
         """Multiply this matrix with another matrix"""
         if isinstance(other, (int, float)):
             return Matrix(*[Vector(*i) for i in
-                            np.multiply(self._columns, other)])
+                            np.multiply(self._columns, other).T])
         elif type(self) == type(other):
             return Matrix(*[Vector(*i) for i in
                             self._columns.dot(other.to_array()).T])
@@ -63,7 +63,7 @@ class Matrix:
 
     def det(self):
         """Return determinant of matrix"""
-        return np.linalg.det(self._columns)
+        return float(np.linalg.det(self._columns))
 
     def __add__(self, other):
         """Add this matrix with another matrix"""
