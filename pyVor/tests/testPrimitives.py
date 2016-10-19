@@ -357,7 +357,9 @@ class MatrixTestCase(unittest.TestCase):
 
     def test_subtract_matrix(self):
         """Tests for subtraction of two matrices"""
-        result1 = Matrix(Vector(0, 0, 0), Vector(-3, -4, -5), Vector(-1, -1, -1))
+        result1 = Matrix(Vector(0, 0, 0),
+                         Vector(-3, -4, -5),
+                         Vector(-1, -1, -1))
         zero_matrix = Matrix(Vector(0, 0, 0), Vector(0, 0, 0), Vector(0, 0, 0))
         self.assertTrue(self.m1 - self.m6 == result1)
         self.assertTrue(self.m1 - self.m1 == zero_matrix)
