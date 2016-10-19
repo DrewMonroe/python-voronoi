@@ -90,7 +90,10 @@ class Matrix:
 
     def inverse(self):
         """Returns a new matrix that is the inverse of the given matrix"""
-        m = np.matrix([v for v in self])
-        print(m)
-        z = np.linalg.inv(m)
-        return Matrix(*[x for x in [np.squeeze(np.asarray(z[i])) for i in range(len(z))]])
+
+        # Take the inverse of the matrix and then turn it back into a Matrix
+        try:
+            return Matrix(*[Vector(*i)
+                          for i in np.linalg.inv(self._columns).T])
+        except np.linalg.linalg.LinAlgError as e:
+            raise ValueError("Inverse does not exist")
