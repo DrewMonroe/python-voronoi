@@ -383,5 +383,23 @@ class MatrixTestCase(unittest.TestCase):
         self.assertTrue(self.m1 ** 2 == result1)
         self.assertTrue(self.m1 * self.m1 * self.m1 == self.m1 ** 3)
 
+    def test_matrix_inversion(self):
+        """Tests to see if matrix inversion works as expected"""
+        inv1 = Matrix(Vector(-2, 1), Vector(1.5, -0.5))
+        self.assertTrue(Matrix(self.v5, self.v6).inverse() == inv1)
+        with self.assertRaises(ValueError):
+            Matrix(self.zero, self.v1, self.v2).inverse()
+        t1 = Vector(-1, 1, 2)
+        t2 = Vector(-1, 3, 2)
+        t3 = Vector(-1, 1, 3)
+        inv2 = Matrix(Vector(-3.5, 0.5, 2),
+                      Vector(-0.5, 0.5, 0),
+                      Vector(-1, 0, 1))
+        self.assertTrue(inv2 == Matrix(t1, t2, t3).inverse())
+        inv3 = Matrix(Vector(-3.5, 2, 0.5),
+                      Vector(-0.5, 0, 0.5),
+                      Vector(-1, 1, 0))
+        self.assertTrue(Matrix(t1, t3, t2).inverse() == inv3)
+
 if __name__ == "__main__":
     unittest.main()
