@@ -7,6 +7,8 @@ class Vector:
     """This class stores imformation about a Vector in R^n"""
     def __init__(self, *components):
         """Store componements in a numpy array under the hood"""
+        if not components:
+            raise ValueError("Dimension Mismatch")
         self._components = np.array(components)
 
     def __repr__(self):
@@ -41,14 +43,14 @@ class Vector:
         if type(self) == type(v) and len(self) == len(v):
             return Vector(*np.subtract(self._components, v))
         else:
-            return NotImplemented
+            raise ValueError("Dimension Mismatch")
 
     def __add__(self, v):
         """Pointwise vector addition"""
         if type(self) == type(v) and len(self) == len(v):
             return Vector(*np.add(self._components, v))
         else:
-            return NotImplemented
+            raise ValueError("Dimension Mismatch")
 
     def __mul__(self, s):
         """Scalar multiplication"""
@@ -57,7 +59,7 @@ class Vector:
         elif type(self) == type(s) and len(self) == len(s):
             return self.dot(s)
         else:
-            return NotImplemented
+            raise ValueError("Dimension Mismatch")
 
     __rmul__ = __mul__
 
@@ -73,7 +75,7 @@ class Vector:
         return np.dot(self._components, v)
 
     def norm_squared(self):
-        """Returns the norm of itself squared"""
+        """Returns the norm of the vector, squared"""
         return self.dot(self)
 
     def lift(self, function=(lambda *args: 1)):

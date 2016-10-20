@@ -8,6 +8,8 @@ class Point:
     """This class stores imformation about a point in R^n"""
     def __init__(self, *components):
         """Store componements in a numpy array under the hood"""
+        if not components:
+            raise ValueError("Empty Point")
         self._components = np.array(components)
 
     def __repr__(self):

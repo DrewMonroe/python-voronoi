@@ -6,7 +6,7 @@ Some of these are relics from an older design.
 import unittest
 
 from pyVor.primitives import Point, Vector, Matrix
-from pyVor.predicates import incircle
+from pyVor.predicates import incircle, ccw
 
 
 class PredicatesTestCase(unittest.TestCase):
@@ -54,7 +54,7 @@ class PredicatesTestCase(unittest.TestCase):
                                      self.r2orig))
         self.assertNotEqual(incircle(self.r2east, self.r2north, self.r2west,
                                      self.r2orig),
-                            incircle(self.r2west, self.r2east, self.r2north,
+                            incircle(self.r2north, self.r2east, self.r2west,
                                      self.r2orig))
 
         # Finitely faraway pt not in (counterclockwise) unit circle
@@ -63,28 +63,6 @@ class PredicatesTestCase(unittest.TestCase):
         # Finitely faraway pt is in the clockwise (inside-out) unit circle
         self.assertEqual(incircle(self.r2west, self.r2north, self.r2east,
                                   r2far_east), 1)
-
-    '''
-    I hate giant commented sections of code too. Don't worry, when we merge
-    this to master with actual tests it will be fixed
-
-    def test_as_columns(self):
-        """Test the thing that joins column Vectors into a matrix."""
-        target = matrix([1, 2, 3],
-                        [4, 5, 6],
-                        [7, 8, 9])
-        col1 = Vector(1, 4, 7)
-        col2 = Vector(2, 5, 8)
-        col3 = Vector(3, 6, 9)
-        self.assertTrue(equal(target, as_columns(col1, col2, col3)))
-
-    def test_Vector(self):
-        """Test our standard function for making column Vectors"""
-        self.assertEqual(len(Vector(0, 1, 2)), 3)
-        self.assertTrue(Vector(0, 1, 2))  # might fail. numpy is a pain.
-        # self.assertTrue(Vector(0, 1, 2).any()) # feels like admitting defeat
-        # depends how we want to use it:
-        # self.assertTrue(Vector(0, 0, 0).any())
 
     def test_ccw(self):
         """Right now this only tests ccw for 1 and 2 dimensions."""
@@ -124,23 +102,6 @@ class PredicatesTestCase(unittest.TestCase):
                           self.r2north, self.r2east)
         self.assertRaises(Exception, ccw, self.r2orig, self.r2south)
 
-
-    def test_lift_matrix(self):
-        """Tests the lift_matrix function."""
-        target = matrix([0, 1, 2],
-                        [3, 4, 5],
-                        [6, 7, 8])
-        base = matrix([0, 1, 2],
-                      [3, 4, 5])
-        # It will be nice if we can just throw whatever data type makes
-        # sense into this function, so let's make sure that happens.
-        list_test = [6, 7, 8]
-        Vector_test = Vector(*list_test)
-        matrix_test = matrix(list_test)
-        self.assertTrue(equal(target, lift_matrix(base, list_test)))
-        self.assertTrue(equal(target, lift_matrix(base, Vector_test)))
-        self.assertTrue(equal(target, lift_matrix(base, matrix_test)))
-'''
 
 if __name__ == "__main__":
     unittest.main()
