@@ -401,5 +401,10 @@ class MatrixTestCase(unittest.TestCase):
                       Vector(-1, 1, 0))
         self.assertTrue(Matrix(t1, t3, t2).inverse() == inv3)
 
+        self.assertEqual(Matrix(t1, t2, t3).inverse() * Matrix(t1, t2, t3),
+                         Matrix(Vector(1, 0, 0),
+                                Vector(0, 1, 0),
+                                Vector(0, 0, 1)))
+
 if __name__ == "__main__":
     unittest.main()
