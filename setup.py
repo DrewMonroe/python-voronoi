@@ -4,7 +4,6 @@ from setuptools import setup, find_packages
 
 version = '0.0.1'
 
-print('Hi!', file=stderr)
 print(find_packages(exclude=['ez_setup', 'tests', 'predicates']), file=stderr)
 
 setup(name='PythonVoronoi',  # Feel free to change this

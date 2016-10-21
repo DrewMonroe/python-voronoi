@@ -87,3 +87,13 @@ class Matrix:
         """Returns a matrix to the power p"""
         return Matrix(*[Vector(*i) for i in
                         np.linalg.matrix_power(self._columns, p).T])
+
+    def inverse(self):
+        """Returns a new matrix that is the inverse of the given matrix"""
+
+        # Take the inverse of the matrix and then turn it back into a Matrix
+        try:
+            return Matrix(*[Vector(*i)
+                          for i in np.linalg.inv(self._columns).T])
+        except np.linalg.linalg.LinAlgError as e:
+            raise ValueError("Inverse does not exist")
