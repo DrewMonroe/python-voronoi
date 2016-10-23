@@ -51,6 +51,10 @@ class VectorTestCase(unittest.TestCase):
         self.assertFalse(Vector(1, 4) == Vector(1, 4, 5))
         # Make sure that vectors of different lengths aren't equal
         self.assertFalse(Vector(1, 2, 3) == Vector(1, 2))
+        # Check that we're not overcorrecting for floating-point error:
+        self.assertFalse(Vector(1.0001, 2, 3) == Vector(1, 2, 3))
+        self.assertFalse(Vector(1.00001, 2, 3) == Vector(1, 2, 3))
+        self.assertFalse(Vector(0.0001, 2, 3) == Vector(0, 2, 3))
 
     def test_weird_edge_cases(self):
         """Tests stuff that is just plain weird but might matter.
@@ -146,9 +150,8 @@ class VectorTestCase(unittest.TestCase):
         # Symmetric
         self.assertEqual(v1.dot(v2), v2.dot(v1))
 
-        # Associative with scalar multiplication
-        self.assertEqual(v1.dot(v2 * 5),
-                         v1.dot(v2) * 5)
+        # Associative with scalar multiplication, up to FP error
+        self.assertLess(abs(v1.dot(v2 * 5) - v1.dot(v2) * 5), 0.0000000001)
 
         # Norm >= 0
         self.assertTrue(v1.dot(v1) >= 0)

@@ -36,7 +36,7 @@ class Vector:
         """Equality if vectors have the same components in the same order"""
         return type(self) == type(v) and\
             len(v) == len(self) and\
-            all([v[i] == self[i] for i in range(len(v))])
+            np.equal(self, v).all()
 
     def __sub__(self, v):
         """Pointwise vector subtraction"""
