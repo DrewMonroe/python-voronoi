@@ -217,7 +217,7 @@ class PointTestCase(unittest.TestCase):
         # Drew's tests:
         self.assertFalse(self.a == self.b)
         self.assertTrue(self.b == self.b)
-        self.assertTrue(self.c == Point(1, 2, 3))
+        self.assertTrue(Point(1, 2, 3) == Point(1, 2, 3))
         self.assertFalse(self.b == self.c)
         self.assertFalse(self.b == (1, 2))
 
@@ -270,6 +270,11 @@ class PointTestCase(unittest.TestCase):
         self.assertEqual(self.a.to_vector(), Vector(0, 0))
         self.assertEqual(self.b.to_vector(), Vector(1, 2))
         self.assertNotEqual(self.b.to_vector(), Vector(1, 2, 0))
+
+    def test_to_array(self):
+        """Make sure the to_array method does not exist, because it's bad."""
+        with self.assertRaises(AttributeError):
+            some_array = self.b.to_array()
 
 
 class MatrixTestCase(unittest.TestCase):
