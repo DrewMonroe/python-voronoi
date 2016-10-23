@@ -9,14 +9,31 @@ class VectorTestCase(unittest.TestCase):
     """Unit tests for the Vector class."""
 
     def setUp(self):
-        """Make some 10-dimensional vectors to play with."""
-        # Some vectors, for when the particular values don't matter.
-        # Note that if v1, v2, or v3 is the zero vector, tests will
-        # fail despite correct behavior.
-        # But that's pretty remarkably improbable unless random.random
-        # is the absolute worst.
-        self.v1 = Vector(*[1.25 * i for i in range(10)])
-        self.v2 = Vector(*[-0.125 * i for i in range(10)])
+        """Make some 10-dimensional vectors to play with.
+
+        In particular, choose diabolical floating point numbers so that
+        we can detect the results of FP error.
+        """
+        self.v1 = Vector(*[-0.2998965351249514,
+                           0.4110061707272957,
+                           0.454364914687145,
+                           -0.34343768867490165,
+                           -0.2703959021323199,
+                           -0.4340274073730961,
+                           0.4039721267238453,
+                           -0.4773026003897761,
+                           -0.3524398480593167,
+                           -0.4452920135793407])
+        self.v2 = Vector(*[-0.1381523240500424,
+                           0.31487872666174777,
+                           -0.21394543219265894,
+                           0.46373363416877067,
+                           -0.01651929425904808,
+                           0.3641792280167877,
+                           0.1698045001675761,
+                           -0.24864460382268017,
+                           -0.45034611714668127,
+                           -0.19333284809046358])
         self.zero_v = Vector(*([0] * 10))  # 10-dimensional 0 vector
 
     def test_vector_length(self):
@@ -188,7 +205,7 @@ class VectorTestCase(unittest.TestCase):
     def test_vector_lift(self):
         """Test to make sure that we can lift a Vector"""
         # Make sure that lifting a vector results in a Vector
-        self.assertTrue(type(Vector(1, 1, 1).lift()) == Vector)
+        self.assertTrue(isinstance(Vector(1, 1, 1).lift(), Vector))
 
         # Define a function to test lifting with
         def f(x):
@@ -240,7 +257,7 @@ class PointTestCase(unittest.TestCase):
         self.assertFalse(self.c.lift(f) == Point(1, 2, 3))
 
         # Make sure that lifting a Point returns a Point
-        self.assertTrue(type(self.b.lift(f)) == Point)
+        self.assertTrue(isinstance(self.b.lift(f), Point))
 
     def test_length(self):
         """Test to see if length of a point makes sense"""
