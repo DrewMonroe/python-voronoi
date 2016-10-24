@@ -49,13 +49,6 @@ class Point:
             raise ValueError('Dimension mismatch')
         return Vector(*[x - y for x, y in zip(self, p)])
 
-    def to_array(self):
-        """Return a numpy array of the components
-        This will be useful for if we need to build up additional data
-        structures from a point
-        """
-        return self._components
-
     def to_vector(self):
         """Turn the point into a vector from the origin"""
         return self - Point(*[0 for x in self])
