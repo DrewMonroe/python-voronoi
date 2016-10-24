@@ -271,11 +271,6 @@ class PointTestCase(unittest.TestCase):
         self.assertEqual(self.b.to_vector(), Vector(1, 2))
         self.assertNotEqual(self.b.to_vector(), Vector(1, 2, 0))
 
-    def test_to_array(self):
-        """Make sure the to_array method does not exist, because it's bad."""
-        with self.assertRaises(AttributeError):
-            some_array = self.b.to_array()
-
 
 class MatrixTestCase(unittest.TestCase):
     """Unit tests for the Matrix class"""
