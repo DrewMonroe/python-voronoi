@@ -31,7 +31,7 @@ class PredicatesTestCase(unittest.TestCase):
         self.homo_west = Point(-1, 0, 1)
         self.homo_orig = Point(0, 0, 1)
 
-    def test_incircle_plane(self):
+    def test_incircle_euclidean(self):
         """Test the incircle predicate in the plane."""
         # TODO - Add tests with extended homogeneous coordinates
 
@@ -118,44 +118,91 @@ class PredicatesTestCase(unittest.TestCase):
                                   Point(2, 1, 0)),
                          0)
 
-
-    def test_ccw(self):
+    def test_ccw_euclidean(self):
         """Right now this only tests ccw for 1 and 2 dimensions."""
         # one-dimensional test.
 
-        one_dim_high = Vector(1)
-        one_dim_low = Vector(0)
+        one_dim_high = Point(1)
+        one_dim_low = Point(0)
         # I don't much care which way is negative, but one had better
         # be positive and the other negative. And they'd better be
         # ints.
-        self.assertEqual((ccw(one_dim_high, one_dim_low) *
-                          ccw(one_dim_low, one_dim_high)),
+        self.assertEqual((ccw(one_dim_high, one_dim_low, homogeneous=False) *
+                          ccw(one_dim_low, one_dim_high, homogeneous=False)),
                          -1)
+        self.assertIsInstance((ccw(one_dim_high, one_dim_low,
+                                   homogeneous=False) *
+                               ccw(one_dim_low, one_dim_high,
+                                   homogeneous=False)),
+                              int)
+
         # co-hyperplanar --> 0
-        self.assertEqual(ccw(one_dim_high, one_dim_high), 0)
+        self.assertEqual(ccw(one_dim_high, one_dim_high, homogeneous=False), 0)
 
         # Now for 2D stuff:
 
         # Invariance under rotation of args
-        self.assertEqual(ccw(self.r2north, self.r2east, self.r2south),
-                         ccw(self.r2south, self.r2north, self.r2east))
+        self.assertEqual(ccw(self.r2north, self.r2east, self.r2south,
+                             homogeneous=False),
+                         ccw(self.r2south, self.r2north, self.r2east,
+                             homogeneous=False))
 
-        self.assertEqual(ccw(self.r2north, self.r2east, self.r2south), -1)
-        self.assertEqual(ccw(self.r2east, self.r2south, self.r2west), -1)
-        self.assertEqual(ccw(self.r2south, self.r2north, self.r2orig), 0)
-        self.assertEqual(ccw(self.r2east, self.r2orig, self.r2east), 0)
-        self.assertEqual(ccw(self.r2west, self.r2east, self.r2south), -1)
-        self.assertEqual(ccw(self.r2west, self.r2south, self.r2north), 1)
+        self.assertEqual(ccw(self.r2north, self.r2east, self.r2south,
+                             homogeneous=False), -1)
+        self.assertEqual(ccw(self.r2east, self.r2south, self.r2west,
+                             homogeneous=False), -1)
+        self.assertEqual(ccw(self.r2south, self.r2north, self.r2orig,
+                             homogeneous=False), 0)
+        self.assertEqual(ccw(self.r2east, self.r2orig, self.r2east,
+                             homogeneous=False), 0)
+        self.assertEqual(ccw(self.r2west, self.r2east, self.r2south,
+                             homogeneous=False), -1)
+        self.assertEqual(ccw(self.r2west, self.r2south, self.r2north,
+                             homogeneous=False), 1)
 
         # Swapping two args flips the sign
-        self.assertEqual(ccw(self.r2west, self.r2south, self.r2north),
-                         -ccw(self.r2south, self.r2west, self.r2north))
-        self.assertEqual(ccw(self.r2west, self.r2east, self.r2orig),
-                         -ccw(self.r2east, self.r2west, self.r2orig))
+        self.assertEqual(ccw(self.r2west, self.r2south, self.r2north,
+                             homogeneous=False),
+                         -ccw(self.r2south, self.r2west, self.r2north,
+                              homogeneous=False))
+        self.assertEqual(ccw(self.r2west, self.r2east, self.r2orig,
+                             homogeneous=False),
+                         -ccw(self.r2east, self.r2west, self.r2orig,
+                              homogeneous=False))
         # Warn us when we make non-square matrices
         self.assertRaises(Exception, ccw, self.r2west, self.r2south,
-                          self.r2north, self.r2east)
-        self.assertRaises(Exception, ccw, self.r2orig, self.r2south)
+                          self.r2north, self.r2east, homogeneous=False)
+        self.assertRaises(Exception, ccw, self.r2orig, self.r2south,
+                          homogeneous=False)
+
+    def test_ccw_projective(self):
+        """Tests ccw with extended homogeneous coordinates"""
+        # Make sure simple stuff works
+        # Should be counterclockwise:
+        self.assertEqual(ccw(self.homo_north, self.homo_south, self.homo_east),
+                         1)
+        # Should be colinear:
+        self.assertEqual(ccw(Point(1, 0, 1), Point(0, 0, 1), Point(-1, 0, 1)),
+                         0)
+        # Should be clockwise:
+        self.assertEqual(ccw(self.homo_north, self.homo_east, self.homo_south),
+                         -1)
+
+        # Now try some weird stuff
+
+        # Tests involving one infinitely distance point:
+        self.assertEqual(ccw(Point(1, 0, 1), Point(0, 0, 1), Point(0, 1, 0)),
+                         -1)
+
+        # Tests involving two infinitely distance points:
+        self.assertEqual(ccw(Point(1, 0, 0), Point(0, 0, 1), Point(0, 1, 0)),
+                         -1)
+        self.assertEqual(ccw(Point(0, 1, 0), Point(0, 0, 1), Point(1, 0, 0)),
+                         1)
+
+        # Points at infinity are colinear:
+        self.assertEqual(ccw(Point(1, 0, 0), Point(-1, 0, 0), Point(0, 1, 0)),
+                         0)
 
 
 if __name__ == "__main__":

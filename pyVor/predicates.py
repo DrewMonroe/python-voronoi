@@ -10,7 +10,7 @@ to make vectors / document how we should make vectors.
 from pyVor.primitives import Matrix, Vector, Point
 
 
-def ccw(*vectors, homogeneous=True):
+def ccw(*points, homogeneous=True):
     """tests if triangle a, b, c is oriented counterclockwise.
 
     Returns 1 if ccw, 0 if colinear, -1 if cw.
@@ -20,9 +20,10 @@ def ccw(*vectors, homogeneous=True):
     the other points appear to be well-oriented according
     to the (n-1)-dimensional test.
     """
-    # if not homogeneous:
-
-    m = Matrix(*[vector.lift() for vector in vectors])
+    if not homogeneous:
+        m = Matrix(*[pt.lift(lambda v: 1).to_vector() for pt in points])
+    else:
+        m = Matrix(*[pt.to_vector() for pt in points])
     return m.sign_det()
 
 

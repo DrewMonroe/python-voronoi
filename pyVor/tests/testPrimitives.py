@@ -188,7 +188,7 @@ class VectorTestCase(unittest.TestCase):
     def test_vector_lift(self):
         """Test to make sure that we can lift a Vector"""
         # Make sure that lifting a vector results in a Vector
-        self.assertTrue(type(Vector(1, 1, 1).lift()) == Vector)
+        self.assertIsInstance(Vector(1, 1, 1).lift(), Vector)
 
         # Define a function to test lifting with
         def f(x):
@@ -240,7 +240,7 @@ class PointTestCase(unittest.TestCase):
         self.assertFalse(self.c.lift(f) == Point(1, 2, 3))
 
         # Make sure that lifting a Point returns a Point
-        self.assertTrue(type(self.b.lift(f)) == Point)
+        self.assertIsInstance(self.b.lift(f), Point)
 
     def test_length(self):
         """Test to see if length of a point makes sense"""
@@ -412,7 +412,7 @@ class MatrixTestCase(unittest.TestCase):
     def test_matrix_sign_det(self):
         """Tests that sign_det returns the sign of the determinant.
 
-        (Rather, sign_det should return an integer with the same sign as the 
+        (Rather, sign_det should return an integer with the same sign as the
         determinant.)
         """
         ident_3 = Matrix(Vector(1, 0, 0),
