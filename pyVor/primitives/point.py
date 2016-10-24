@@ -26,7 +26,11 @@ class Point:
 
     def __getitem__(self, val):
         """Be able to access an individual component of a point"""
-        return self._components[val]
+        if isinstance(val, slice):
+            # This part could conceivably throw ValueError("Empty Point")
+            return Point(*self._components[val])
+        else:
+            return self._components[val]
 
     def __iter__(self):
         """So that we can iterate over the components of a point"""
@@ -40,7 +44,7 @@ class Point:
             all([p[i] == self[i] for i in range(len(p))])
 
     def __sub__(self, p):
-        """We need to implement this once we have a vector class"""
+        """Subtract two points to obtain a Vector"""
         if len(self) != len(p):
             raise ValueError('Dimension mismatch')
         return Vector(*[x - y for x, y in zip(self, p)])
