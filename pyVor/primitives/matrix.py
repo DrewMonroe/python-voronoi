@@ -65,6 +65,14 @@ class Matrix:
         """Return determinant of matrix"""
         return float(np.linalg.det(self._columns))
 
+    def sign_det(self):
+        """Returns just the sign of the determinant.
+
+        Someday this might be more efficient than Matrix.det, and so if you only
+        want the sign, then you should use this one.
+        """
+        return int(np.sign(self.det()))
+
     def __add__(self, other):
         """Add this matrix with another matrix"""
         return Matrix(*[Vector(*i) for i in
@@ -96,4 +104,5 @@ class Matrix:
             return Matrix(*[Vector(*i)
                           for i in np.linalg.inv(self._columns).T])
         except np.linalg.linalg.LinAlgError as e:
-            raise ValueError("Inverse does not exist")
+            #e.args += ("Attempted to invert a singular matrix",)
+            raise ValueError("Matrix is not invertible") from e

@@ -258,8 +258,11 @@ class PointTestCase(unittest.TestCase):
             # I want a warning when I accidentally try to set values:
             self.b[-1] = 10
 
+        self.assertIsInstance(self.a[:-1], Point)
+
     def test_subtraction(self):
         """Test point subtraction"""
+        self.assertIsInstance(self.b - self.a, Vector)
         self.assertTrue(self.b - self.b == Vector(0, 0))
         self.assertTrue(self.b - self.a == Vector(1, 2))
         self.assertFalse(self.b - self.b == Point(0, 0))
@@ -405,6 +408,31 @@ class MatrixTestCase(unittest.TestCase):
                          Matrix(Vector(1, 0, 0),
                                 Vector(0, 1, 0),
                                 Vector(0, 0, 1)))
+
+    def test_matrix_sign_det(self):
+        """Tests that sign_det returns the sign of the determinant.
+
+        (Rather, sign_det should return an integer with the same sign as the 
+        determinant.)
+        """
+        ident_3 = Matrix(Vector(1, 0, 0),
+                         Vector(0, 1, 0),
+                         Vector(0, 0, 1))
+        # The following are just some cases where it's easy
+        # to do the math in your head.
+        self.assertEqual(ident_3.sign_det(),
+                         1)
+        self.assertEqual((ident_3 - ident_3).sign_det(),
+                         0)
+        # (A lower-triangular matrix. And don't forget it.)
+        self.assertEqual(Matrix(Vector(1, 2, 3),
+                                Vector(0, -12, 5),
+                                Vector(0, 0, 0.001)).sign_det(),
+                         -1)
+
+        self.assertIsInstance(Matrix(Vector(1, 2),
+                                     Vector(3, 4)).sign_det(),
+                              int)
 
 if __name__ == "__main__":
     unittest.main()
