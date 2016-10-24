@@ -21,10 +21,10 @@ def ccw(*points, homogeneous=True):
     to the (n-1)-dimensional test.
     """
     if not homogeneous:
-        m = Matrix(*[pt.lift(lambda v: 1).to_vector() for pt in points])
+        mtrx = Matrix(*[pt.lift(lambda v: 1).to_vector() for pt in points])
     else:
-        m = Matrix(*[pt.to_vector() for pt in points])
-    return m.sign_det()
+        mtrx = Matrix(*[pt.to_vector() for pt in points])
+    return mtrx.sign_det()
 
 
 def incircle(*points, homogeneous=True):
@@ -42,14 +42,15 @@ def incircle(*points, homogeneous=True):
 
     if homogeneous:
         # The points already have homogeneous coordinates
-        vectors = [p[:-1] - Point(*([0] * (len(p) - 1))) for p in points]
-        h_lifts = [p[-1] for p in points]
+        vectors = [pt - Point(*([0] * len(pt))) for pt in points]
     else:
         # We'll give each point a homogeneous coordinate of 1
-        vectors = [p - Point(*([0] * len(p))) for p in points]
-        h_lifts = [1] * len(points)
+        vectors = [(pt - Point(*([0] * len(pt)))).lift() for pt in points]
 
-    vectors = [vectors[i].lift(lambda v: v.norm_squared())
-               .lift(lambda v: h_lifts[i]) for i in range(len(vectors))]
-
-    return Matrix(*vectors).sign_det()
+    vectors = [vector.lift(lambda v: v[:-1].norm_squared())
+               for vector in vectors]
+    # At this point we could switch the last two elements of each
+    # vector to get the matrix we want to test. But we can
+    # also just use the fact that if you swap 2 rows of a
+    # matrix, the sign of the determinant is flipped. So:
+    return - Matrix(*vectors).sign_det()

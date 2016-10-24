@@ -160,6 +160,8 @@ class VectorTestCase(unittest.TestCase):
         with self.assertRaises(IndexError):
             my_vector[len(my_vector)]
 
+        self.assertIsInstance(my_vector[:-1], Vector)
+
     def test_norm_squared(self):
         """Make sure that the norm_squared is right"""
         zero_v = self.zero_v
