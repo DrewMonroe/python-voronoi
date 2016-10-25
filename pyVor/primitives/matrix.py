@@ -55,6 +55,8 @@ class Matrix:
         if isinstance(other, (int, float)):
             return Matrix(*[Vector(*i) for i in
                             np.multiply(self._columns, other).T])
+        elif isinstance(other, (Vector)):
+            return Vector(*np.dot(self._columns, other))
         elif type(self) == type(other):
             return Matrix(*[Vector(*i) for i in
                             self._columns.dot(other.to_array()).T])

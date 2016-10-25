@@ -293,6 +293,7 @@ class MatrixTestCase(unittest.TestCase):
         self.m4 = Matrix(self.v5, self.v6)
         self.m5 = Matrix(self.v7, self.v8)
         self.m6 = Matrix(self.v1, self.v9, self.v2)
+        self.I = Matrix(Vector(1, 0, 0), Vector(0, 1, 0), Vector(0, 0, 1))
 
     def test_matrix_init(self):
         """Make sure we cannot initialize matrices that don't make sense"""
@@ -337,6 +338,12 @@ class MatrixTestCase(unittest.TestCase):
         self.assertTrue(self.m4 * self.m5 == result1)
         result2 = Matrix(Vector(3, 4, 5), Vector(9, 13, 17), Vector(2, 3, 4))
         self.assertTrue(self.m1 * self.m6 == result2)
+
+    def test_vector_multiplication(self):
+        """Tests for matrix, vector multiplication"""
+        self.assertTrue(self.I*self.v1 == self.v1)
+        result1 = Vector(7, 10)
+        self.assertTrue(self.m4 * self.v5 == result1)
 
     def test_scalar_multiplication(self):
         """Tests for multiplication of a matrix and a scalar"""
