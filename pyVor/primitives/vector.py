@@ -8,7 +8,7 @@ class Vector:
     def __init__(self, *components):
         """Store componements in a numpy array under the hood"""
         if not components:
-            raise ValueError("Dimension Mismatch")
+            raise ValueError("Empty Vector")
         self._components = np.array(components)
 
     def __repr__(self):
@@ -25,7 +25,11 @@ class Vector:
 
     def __getitem__(self, val):
         """Be able to access an individual component of a vector"""
-        return self._components[val]
+        if isinstance(val, slice):
+            # This part could conceivably throw ValueError("Empty Point")
+            return Vector(*self._components[val])
+        else:
+            return self._components[val]
 
     def __iter__(self):
         """So that we can iterate over the components of a vector"""
