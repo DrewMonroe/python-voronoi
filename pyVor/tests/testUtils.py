@@ -45,5 +45,12 @@ class UtilsTestCase(unittest.TestCase):
                                       Point(2, 1, 1)),
                          Point(2, 2, 1))
 
+        # We'll want this to pass once we get things fully working.
+        # TODO: We'll probably want to rewrite this test once we get everything
+        # figured out
+        self.assertEqual(circumcenter(Point(0, 0, 1), Point(0, 1, 1),
+                                      Point(2, 2, 0))[-1],
+                         0)
+
 if __name__ == "__main__":
     unittest.main()
