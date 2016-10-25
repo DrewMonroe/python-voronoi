@@ -160,6 +160,8 @@ class VectorTestCase(unittest.TestCase):
         with self.assertRaises(IndexError):
             my_vector[len(my_vector)]
 
+        self.assertIsInstance(my_vector[:-1], Vector)
+
     def test_norm_squared(self):
         """Make sure that the norm_squared is right"""
         zero_v = self.zero_v
@@ -188,7 +190,7 @@ class VectorTestCase(unittest.TestCase):
     def test_vector_lift(self):
         """Test to make sure that we can lift a Vector"""
         # Make sure that lifting a vector results in a Vector
-        self.assertTrue(type(Vector(1, 1, 1).lift()) == Vector)
+        self.assertIsInstance(Vector(1, 1, 1).lift(), Vector)
 
         # Define a function to test lifting with
         def f(x):
@@ -217,7 +219,7 @@ class PointTestCase(unittest.TestCase):
         # Drew's tests:
         self.assertFalse(self.a == self.b)
         self.assertTrue(self.b == self.b)
-        self.assertTrue(self.c == Point(1, 2, 3))
+        self.assertTrue(Point(1, 2, 3) == Point(1, 2, 3))
         self.assertFalse(self.b == self.c)
         self.assertFalse(self.b == (1, 2))
 
@@ -240,7 +242,7 @@ class PointTestCase(unittest.TestCase):
         self.assertFalse(self.c.lift(f) == Point(1, 2, 3))
 
         # Make sure that lifting a Point returns a Point
-        self.assertTrue(type(self.b.lift(f)) == Point)
+        self.assertIsInstance(self.b.lift(f), Point)
 
     def test_length(self):
         """Test to see if length of a point makes sense"""
@@ -258,8 +260,11 @@ class PointTestCase(unittest.TestCase):
             # I want a warning when I accidentally try to set values:
             self.b[-1] = 10
 
+        self.assertIsInstance(self.a[:-1], Point)
+
     def test_subtraction(self):
         """Test point subtraction"""
+        self.assertIsInstance(self.b - self.a, Vector)
         self.assertTrue(self.b - self.b == Vector(0, 0))
         self.assertTrue(self.b - self.a == Vector(1, 2))
         self.assertFalse(self.b - self.b == Point(0, 0))
@@ -293,6 +298,7 @@ class MatrixTestCase(unittest.TestCase):
         self.m4 = Matrix(self.v5, self.v6)
         self.m5 = Matrix(self.v7, self.v8)
         self.m6 = Matrix(self.v1, self.v9, self.v2)
+        self.I = Matrix(Vector(1, 0, 0), Vector(0, 1, 0), Vector(0, 0, 1))
 
     def test_matrix_init(self):
         """Make sure we cannot initialize matrices that don't make sense"""
@@ -337,6 +343,12 @@ class MatrixTestCase(unittest.TestCase):
         self.assertTrue(self.m4 * self.m5 == result1)
         result2 = Matrix(Vector(3, 4, 5), Vector(9, 13, 17), Vector(2, 3, 4))
         self.assertTrue(self.m1 * self.m6 == result2)
+
+    def test_vector_multiplication(self):
+        """Tests for matrix, vector multiplication"""
+        self.assertTrue(self.I*self.v1 == self.v1)
+        result1 = Vector(7, 10)
+        self.assertTrue(self.m4 * self.v5 == result1)
 
     def test_scalar_multiplication(self):
         """Tests for multiplication of a matrix and a scalar"""
@@ -405,6 +417,31 @@ class MatrixTestCase(unittest.TestCase):
                          Matrix(Vector(1, 0, 0),
                                 Vector(0, 1, 0),
                                 Vector(0, 0, 1)))
+
+    def test_matrix_sign_det(self):
+        """Tests that sign_det returns the sign of the determinant.
+
+        (Rather, sign_det should return an integer with the same sign as the
+        determinant.)
+        """
+        ident_3 = Matrix(Vector(1, 0, 0),
+                         Vector(0, 1, 0),
+                         Vector(0, 0, 1))
+        # The following are just some cases where it's easy
+        # to do the math in your head.
+        self.assertEqual(ident_3.sign_det(),
+                         1)
+        self.assertEqual((ident_3 - ident_3).sign_det(),
+                         0)
+        # (A lower-triangular matrix. And don't forget it.)
+        self.assertEqual(Matrix(Vector(1, 2, 3),
+                                Vector(0, -12, 5),
+                                Vector(0, 0, 0.001)).sign_det(),
+                         -1)
+
+        self.assertIsInstance(Matrix(Vector(1, 2),
+                                     Vector(3, 4)).sign_det(),
+                              int)
 
 if __name__ == "__main__":
     unittest.main()

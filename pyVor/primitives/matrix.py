@@ -55,6 +55,8 @@ class Matrix:
         if isinstance(other, (int, float)):
             return Matrix(*[Vector(*i) for i in
                             np.multiply(self._columns, other).T])
+        elif isinstance(other, (Vector)):
+            return Vector(*np.dot(self._columns, other))
         elif type(self) == type(other):
             return Matrix(*[Vector(*i) for i in
                             self._columns.dot(other.to_array()).T])
@@ -64,6 +66,14 @@ class Matrix:
     def det(self):
         """Return determinant of matrix"""
         return float(np.linalg.det(self._columns))
+
+    def sign_det(self):
+        """Returns just the sign of the determinant (as an int in [-1, 0, 1])
+
+        Someday this might be more efficient than Matrix.det, and so if you
+        only want the sign, then you should use this one.
+        """
+        return int(np.sign(self.det()))
 
     def __add__(self, other):
         """Add this matrix with another matrix"""
@@ -96,4 +106,4 @@ class Matrix:
             return Matrix(*[Vector(*i)
                           for i in np.linalg.inv(self._columns).T])
         except np.linalg.linalg.LinAlgError as e:
-            raise ValueError("Inverse does not exist")
+            raise ValueError("Matrix is not invertible") from e
