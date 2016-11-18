@@ -11,6 +11,7 @@ def main():
     """
     win = g.GraphWin()  # Make a new graphics window
     points = []  # This will store the pyVor.Points that have been clicked
+    t = []  # This will store the clicks so that we can make a triangle
 
     # Get three points from the mouse click and draw them
     for i in range(0, 3):
@@ -22,6 +23,7 @@ def main():
         p.draw(win)  # draw that click
         # Add the pyVor.point to a list
         points.append(pyVor.primitives.Point(click.x, click.y))
+        t.append(click)
 
     # Computer the circumcenter of the points
     center = pyVor.utils.circumcenter(*points, homogeneous=False)
@@ -33,6 +35,11 @@ def main():
                                          (center[1] - points[0][1]) ** 2))
     # Draw the circle
     circle.draw(win)
+
+    # Draw a yellow triangle that we are circumscribing
+    triangle = g.Polygon(t)
+    triangle.setFill("yellow")
+    triangle.draw(win)
 
     # Exit on the next mouse click
     win.getMouse()
