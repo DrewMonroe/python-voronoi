@@ -15,7 +15,11 @@ def main():
     # Get three points from the mouse click and draw them
     for i in range(0, 3):
         click = win.getMouse()  # get one click
-        click.draw(win)  # draw that click
+        # create a black circle (which is more visible than a single pixel)
+        # around the point that the user clicked on
+        p = g.Circle(click, 2)
+        p.setFill("black")
+        p.draw(win)  # draw that click
         # Add the pyVor.point to a list
         points.append(pyVor.primitives.Point(click.x, click.y))
 
