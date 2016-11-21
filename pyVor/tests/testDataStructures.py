@@ -4,10 +4,24 @@ Unit tests for triangulation class
 """
 
 from pyVor.primitives import Point, Vector
+from pyVor.structures import SimplicialComplex
 import unittest
 
-class SimplexTestCase(unittest.TestCase):
 
+class OtherSimplicialComplexTestCase(unittest.TestCase):
+    """We can't get past setUp with the real TestCase."""
+
+    def test_vertex_compare(self):
+        """Comparison is iffy."""
+        verts = []
+        for i in range(-5, 5):
+            for j in range(-5, 5):
+                verts.append(SimplicialComplex.Vertex(Point(i, j, 1)))
+        self.assertNotEqual(verts, sorted(verts))
+        self.assertEqual(sorted(verts), sorted(verts))
+        self.assertLess(sorted(verts)[0], sorted(verts)[1])
+        self.assertNotEqual(verts[0], verts[1])
+        self.assertEqual(verts[0], verts[0])
 
 class SimplicialComplexTestCase(unittest.TestCase):
     """Tests for simplicial complexes.
@@ -39,8 +53,10 @@ class SimplicialComplexTestCase(unittest.TestCase):
                               Point(0, 1), Point(4, 1), Point(5, 1),
                               Point(1, 0)]
         self.one_d_sim = SimplicialComplex(
-            vertices=self.one_d_sim_pts,  # Faces in R^1 are intervals
-            faces=[self.one_d_sim_pts[i:i+1]
+            # vertices=
+            self.one_d_sim_pts,  # Faces in R^1 are intervals
+            # faces=
+            [self.one_d_sim_pts[i:i+2]
                    for i in range(len(self.one_d_sim_pts) - 1)])
         # There's a subtlety here in that I only passed one instance
         # representing each distinct point to the constructor above.
@@ -52,12 +68,14 @@ class SimplicialComplexTestCase(unittest.TestCase):
                               Point(-1, 1, 0),  # points at infinity
                               Point(0, 0, 1)]  # Keep it simple.
         self.two_d_sim = SimplicialComplex(
-            vertices=self.two_d_sim_pts,
+            # vertices=
+            self.two_d_sim_pts,
             # vertices of faces must be specified in CCW order.
             # Check: They should be [S, NE, 0], [NE, 0, NW],  [NW, S, 0]
             # (Also notice if you consider their centers, the faces are
             #  also passed in CCW order in a sense.)
-            faces=[[Point(0, -1, 0), Point(1, 1, 0), Point(0, 0, 1)],
+            # faces=
+            [[Point(0, -1, 0), Point(1, 1, 0), Point(0, 0, 1)],
                    [Point(1, 1, 0), Point(0, 0, 1), Point(-1, 1, 0)],
                    [Point(-1, 1, 0), Point(0, -1, 0), Point(0, 0, 1)]])
         # TODO make higher dimensional ones of these.
@@ -77,9 +95,9 @@ class SimplicialComplexTestCase(unittest.TestCase):
         # currently care about their type (could be Point but probably
         # shouldn't be)
         self.assertEqual(len(self.one_d_sim_pts),
-                         len([*self.one_d_sim.simplices(0)]))
+                         len([*self.one_d_sim.iter_simplices(0)]))
         self.assertEqual(len(self.one_d_sim_pts) - 1,
-                         len([*self.one_d_sim.simplices(1)]))
+                         len([*self.one_d_sim.iter_simplices(1)]))
 
     def test_iterate_simplex_points(self):
         """Should be able to iterate over the Points in a simplex."""
@@ -92,7 +110,7 @@ class SimplicialComplexTestCase(unittest.TestCase):
         """
         # Test for the 1-D case:
         # (-2, 1) should be in the face defined by (-5, 1) and (-1, 1).
-        for point in self.one_d_sim.locate(Point(-2, 1)).points():
+        for point in self.one_d_sim.locate(Point(-2, 1)).iter_points():
             self.assertIn(point, [Point(-5, 1), Point(-1, 1)])
 
 
@@ -110,7 +128,7 @@ class SimplicialComplexTestCase(unittest.TestCase):
     def test_simplex_split(self):
         """Test splitting a d-dimensional face into d+1 new faces."""
         # I could totally be wrong about d+1, but it's correct for
-        # d in [1, 2, 3]. ... I hand-wavy proof follows:
+        # d in [1, 2, 3]. ... A hand-wavy proof follows:
 
         # Add query point q to some k-simplex:
         # k-simplex has k+1 vertices therefore also k+1 [k-1]-simplices.
@@ -134,7 +152,7 @@ class SimplicialComplexTestCase(unittest.TestCase):
 
         pass  # TODO obviously
 
-class PolytopalComplex(unittest.TestCase):
+class PosetTestCase(unittest.TestCase):
     """This is like a simplicial complex, but instead of simplices it has
     arbitrary convex polytopes as faces. (So, d-dimensional components
     need not be defined by d+1 vertices. Although they should have

@@ -276,6 +276,17 @@ class PointTestCase(unittest.TestCase):
         self.assertEqual(self.b.to_vector(), Vector(1, 2))
         self.assertNotEqual(self.b.to_vector(), Vector(1, 2, 0))
 
+    def test_hashing(self):
+        """Make sure point hashing works and does not cause collisions"""
+        # Add 400 points' hashes to a set and make sure 400 things are in the set
+        some_hashes = set()
+        for x in range(-10, 10):
+            for y in range(-10, 10):
+                some_hashes.add(hash(Point(x, y, 1)))
+        self.assertEqual(len(some_hashes), 400)
+
+        self.assertEqual(hash(Point(0, 1, 2)),
+                         hash(Point(0, 1, 2)))
 
 class MatrixTestCase(unittest.TestCase):
     """Unit tests for the Matrix class"""

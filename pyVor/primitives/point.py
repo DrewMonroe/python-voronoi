@@ -49,6 +49,10 @@ class Point:
             raise ValueError('Dimension mismatch')
         return Vector(*[x - y for x, y in zip(self, p)])
 
+    def __hash__(self):
+        """Implement hashing for data structures"""
+        return hash(self._components.tostring())
+
     def to_vector(self):
         """Turn the point into a vector from the origin"""
         return self - Point(*[0 for x in self])
