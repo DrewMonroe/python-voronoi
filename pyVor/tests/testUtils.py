@@ -30,14 +30,6 @@ class UtilsTestCase(unittest.TestCase):
 
         # Now let's see how it deals with homogeneous coordinates
 
-        # Since we haven't yet decided how/whether to deal with
-        # *extended* homogeneous coordinates in particular
-        # (i.e. Point(*values, 0)), we throw an exception.
-        # If we decide what to do, we should replace the following
-        # test with something more useful:
-        self.assertRaises(NotImplementedError, circumcenter,
-                          Point(1, 0, 1), Point(0, 1, 0), Point(0, -1, 1))
-
         # Now make sure homogeneous coordinates are properly ignored
         # if they are all 1. (But the point returned should be
         # of the same dimension as the input.)
@@ -45,12 +37,16 @@ class UtilsTestCase(unittest.TestCase):
                                       Point(2, 1, 1)),
                          Point(2, 2, 1))
 
-        # We'll want this to pass once we get things fully working.
-        # TODO: We'll probably want to rewrite this test once we get everything
-        # figured out
+        # The circumcenter of an unbounded set should be infinitely far away
         self.assertEqual(circumcenter(Point(0, 0, 1), Point(0, 1, 1),
                                       Point(2, 2, 0))[-1],
                          0)
+
+        # Similar, but with multiple homogeneous points
+        self.assertEqual(circumcenter(Point(0, 0, 1), Point(0, 1, 0),
+                                      Point(2, 2, 0))[-1],
+                         0)
+
 
 if __name__ == "__main__":
     unittest.main()

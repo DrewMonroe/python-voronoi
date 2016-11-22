@@ -23,8 +23,20 @@ def ccw(*points, homogeneous=True):
     if not homogeneous:
         mtrx = Matrix(*[pt.lift(lambda v: 1).to_vector() for pt in points])
     else:
-        mtrx = Matrix(*[pt.to_vector() for pt in points])
-    return mtrx.sign_det()
+        mtrx = None
+        for pt in points:
+            if pt[-1] == 1:
+                # We need at list one non-infinite point
+                # for this to work normally
+                mtrx = Matrix(*[pt.to_vector() for pt in points])
+                break
+    if mtrx is not None:
+        return mtrx.sign_det()
+    # If all points have 0 for extended homogeneous coordinate,
+    # win by using the ccw test for one dimension higher:
+    return ccw(*points,
+               Point(*(0 for i in range(len(points[0]) - 1)), -1),
+               homogeneous=False)
 
 
 def incircle(*points, homogeneous=True):
