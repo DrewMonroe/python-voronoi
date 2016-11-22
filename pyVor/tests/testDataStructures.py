@@ -12,12 +12,12 @@ class OtherSimplicialComplexTestCase(unittest.TestCase):
     """We can't get past setUp with the real TestCase."""
 
     def test_vertex_compare(self):
-        """Comparison is iffy."""
+        """Make sure vertices have an order that's reasonable."""
         verts = []
         for i in range(-5, 5):
             for j in range(-5, 5):
                 verts.append(SimplicialComplex.Vertex(Point(i, j, 1)))
-        self.assertNotEqual(verts, sorted(verts))
+        self.assertEqual(sorted(verts), sorted(verts[::-1]))  # consistency
         self.assertEqual(sorted(verts), sorted(verts))
         self.assertLess(sorted(verts)[0], sorted(verts)[1])
         self.assertNotEqual(verts[0], verts[1])
@@ -151,6 +151,10 @@ class SimplicialComplexTestCase(unittest.TestCase):
         # so I'm no worse than when I started.)
 
         pass  # TODO obviously
+
+    def test_vertex_hashing(self):
+        """Make sure the hashes of vertices never change"""
+        pass
 
 class PosetTestCase(unittest.TestCase):
     """This is like a simplicial complex, but instead of simplices it has

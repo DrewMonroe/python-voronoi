@@ -1,27 +1,8 @@
 #!/usr/bin/env python3
 
-
-
-# class Poset(object):
-#     """A collection of faces of various dimensions, all convex.
-
-#     This is used to represent triangulations and Voronoi diagrams.
-#     """
-
-#     class Face:
-
-#         parents = None
-        
-
-#     def __init__(self, dimension, points=None, facets=None):
-#         """I honestly am not sure we need to build one of these from scratch.
-
-#         Dimension is number of dimensions.
-#         """
-#         self.vertices = 
-
 from pyVor.primitives import Point
 from pyVor.predicates import ccw
+
 
 class GeneralPositionError(Exception):
     """For when the input isn't in general position.
@@ -31,38 +12,42 @@ class GeneralPositionError(Exception):
     def __init__(self, *args):
         super().__init__("Points not in general position", *args)
 
+
 class SimplicialComplex:
     """A d-dimensional set of faces. Essentially a triangulation."""
 
     # vertices = []  # The order of these never changes
     # faces = []
 
-## Process: Input = set of vertices, set of faces (to be closed under subset)
-## Establish total order on vertices. DONE
-## Make faces with tuples of vertices (hashable; in total order)
-## For pairs of faces, if they should share a facet, make it. (Do this by DFS)
-## (Facets will store directional information, i.e. which side each face is on.) DONE
-## Iterable: both points and Vertices
+# Process: Input = set of vertices, set of faces (to be closed under subset)
+# Establish total order on vertices. DONE
+# Make faces with tuples of vertices (hashable; in total order)
+# For pairs of faces, if they should share a facet, make it. (Do this by DFS?)
+# (Facets will store directional information, i.e. which side each face is on.) DONE
+# Iterable: both points and Vertices
+
 
     class Face:
         """A d-dimensional face. Has d+1 vertices and facets."""
         # vertices = []  # To be sorted in ascending order
         # facets = {}  # Will map lists of vertices to faces
 
-        # def _common_vertices(self, other):
-        #     """What vertices do I have in common with this other face? List."""
-        #     # Not useful. See _generate_facet instead
-        #     raise NotImplementedError
-
         def __init__(self, vertices):
             """Constructs the face, but doesn't add any facets.
 
             (This is because of course it is not aware of anything but its own
             vertices.)
+
+            Sorts the vertices so you don't need to.
             """
             vertices.sort()
             self.vertices = tuple(vertices)
             self.facets = {}
+
+        def __str__(self):
+            """Return a string representation of this Face"""
+            return "Face({})".format(
+                ','.join(str(vert) for vert in self.vertices))
 
         def add_facet(self, facet, vertex):
             """Add a facet, vertex pair.
@@ -71,7 +56,6 @@ class SimplicialComplex:
             so we don't worry about that here.
             """
             self.facets[vertex] = facet
-
 
         def _generate_facet(self, other, add_to_faces=True):
             """Construct the common facet, if it exists.
@@ -85,7 +69,7 @@ class SimplicialComplex:
             be used by the SimplicialComplex constructor.
             """
             if (len(self.vertices) == len(self.facets) or
-                len(other.vertices) == len(other.facets)):
+                    len(other.vertices) == len(other.facets)):
                 # We don't need more facets.
                 return None
             # The vertices of each will be in order, so we can
@@ -96,8 +80,9 @@ class SimplicialComplex:
             i_other = 0
             v_self = None  # The vertices not in both self and other
             v_other = None
-            while (i_self < len(self.vertices)
-                   and i_other < len(other.vertices)):
+            while (i_self < len(self.vertices) and
+                   i_other < len(other.vertices)):
+                # print("Loop: {}, {}".format(i_self, i_other))
                 if self.vertices[i_self] == other.vertices[i_other]:
                     i_self += 1
                     i_other += 1
@@ -114,10 +99,18 @@ class SimplicialComplex:
                 else:
                     # The two faces do not share a facet
                     # (I.e. they don't have d-1 vertices in common)
+                    # print("FUFUFU")
                     return None
+            # print("After loop: {}, {}".format(i_self, i_other))
+            # The loop misses this case:
+            if v_self is None and i_self == len(self.vertices) - 1:
+                v_self = self.vertices[i_self]
+            elif v_other is None and i_other == len(other.vertices) - 1:
+                v_other = other.vertices[i_other]
             if v_self in self.facets:
                 # Don't change anything or return anything. A facet
                 # exists already.
+                # print("FUUFUUFUU")
                 return None
             if (v_self is None) or (v_other is None):
                 # This should never happen but is happening
@@ -128,6 +121,7 @@ class SimplicialComplex:
                 return None
             facet = SimplicialComplex.Facet([self, other], [v_self, v_other])
             if add_to_faces:
+                # print("Actually added {} to faces!".format(str(facet)))
                 self.facets[v_self] = facet
                 other.facets[v_other] = facet
             return facet
@@ -165,7 +159,7 @@ class SimplicialComplex:
 
         def contains(self, point, **kwargs):
             """Is the query point inside this simplex?
-            
+
             (You can pass **kwargs for predicates.ccw.)
             """
             for facet in self.iter_facets():
@@ -184,16 +178,31 @@ class SimplicialComplex:
             self.point = point
 
         def __gt__(self, other):
-            return hash(self) > hash(other)
+            # return hash(self) > hash(other)
+            return other < self
 
-        def __lt__(self, other):  # Used exclusively by sort builtin.
-            return hash(self) < hash(other)
+        # def __lt__(self, other):  # Used exclusively by sort builtin.
+        #     return hash(self) < hash(other)
+        def __lt__(self, other):
+            """Lexicographic comparator"""
+            for mine, theirs in zip(self.point, other.point):
+                if mine == theirs:
+                    continue
+                return mine < theirs
+            return False
 
         def __le__(self, other):
-            return hash(self) <= hash(other)
+            #return hash(self) <= hash(other)
+            return (self.point == other.point or
+                    self < other)
 
         def __ge__(self, other):
-            return hash(self) >= hash(other)
+            #return hash(self) >= hash(other)
+            return other < self
+
+        def __str__(self):
+            """Return a string representation of this Vertex"""
+            return 'Vertex({})'.format(str(self.point))
 
         # def __eq__(self, other):  # I'd prefer pointer comparison
         #     return self.point == other.point
@@ -225,6 +234,8 @@ class SimplicialComplex:
                 # Reverse things
                 vertices = vertices[::-1]
                 faces = faces[::-1]
+            # print("Facet created! {}, {}".format([*map(str, faces)],
+            #                                      [*map(str, vertices)]))
             self.faces = tuple(faces)
             self._vertices = tuple(vertices)
             if ccw(*[vert.point for vert in faces[0].iter_vertices()
@@ -256,8 +267,7 @@ class SimplicialComplex:
                 # The point is co-planar with this face. Shucks.
                 raise GeneralPositionError
 
-
-    def __init__(self, points, face_sets):
+    def __init__(self, points, face_sets, outside_face=None):
         """Constructor for SimplicialComplex
 
         Pass a set of points and a list of "faces", which are
@@ -268,7 +278,8 @@ class SimplicialComplex:
         # We have to make a bunch of faces, now. They won't have facets yet.
         # Convert all the faces to vertices:
         points_to_verts = {vert.point: vert for vert in self.vertices}
-        face_sets = [[*map(lambda p: points_to_verts[p], fs)] for fs in face_sets]
+        face_sets = [[*map(lambda p: points_to_verts[p], fs)]
+                     for fs in face_sets]
         self.faces = []
         for fs in face_sets:
             self.faces.append(self.Face(fs))  # Face does its own sorting
@@ -278,8 +289,31 @@ class SimplicialComplex:
         # If we see huge enough point sets in low dimensions,
         # there could maybe be a better way, though it would be
         # rather complicated.
+        # self.outside_face = self.Face([
+        # TODO think about how to handle outside face
+        #     vert in self.vertices if vert 
         for i in range(len(self.faces)):
             for j in range(i + 1, len(self.faces)):
                 self.faces[i]._generate_facet(self.faces[j],
                                               add_to_faces=True)
-        
+            if len(self.faces[i].facets) != len(self.faces[i].vertices):
+                
+
+    def locate(self, point, assume_delaunay=True):
+        """Return the face containing the given point.
+
+        If no face contains the point, return None.
+
+        If assume_delaunay=True, the algorithm may be faster
+        but is only guaranteed to halt if the SimplicialComplex
+        is in fact Delaunay.
+        """
+        # print('About to be problems for {}'.format(str(self)))
+        # for face in self.faces:
+        #     for vertex in face.iter_vertices():
+        #         if vertex not in face.facets:
+        #             print("{} {}".format(face, vertex))
+        for face in self.faces:
+            if face.contains(point):
+                return face
+        return None
