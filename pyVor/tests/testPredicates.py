@@ -143,7 +143,6 @@ class PredicatesTestCase(unittest.TestCase):
         # co-hyperplanar --> 0
         self.assertEqual(ccw(one_dim_high, one_dim_high, homogeneous=False), 0)
 
-
         # Now for 2D stuff:
 
         # Invariance under rotation of args
@@ -196,7 +195,6 @@ class PredicatesTestCase(unittest.TestCase):
         # With two homogeneous coordinates
         self.assertEqual(ccw(Point(0, 1), Point(1, 1)),
                          ccw(Point(-10, 0), Point(5, 0)))
-
 
         # Make sure simple stuff works
         # Should be counterclockwise:
