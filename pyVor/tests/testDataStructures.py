@@ -3,196 +3,103 @@
 Unit tests for triangulation class
 """
 
-from pyVor.primitives import Point, Vector
-from pyVor.structures import SimplicialComplex
 import unittest
 
+from pyVor.primitives import Point
+from pyVor.structures import DelaunayTriangulation as DelT
 
-class OtherSimplicialComplexTestCase(unittest.TestCase):
-    """We can't get past setUp with the real TestCase."""
+
+class DelaunayTriangulationTestCase(unittest.TestCase):
+    """Tests for the triangulation data structure."""
+
+    def test_locally_delaunay(self):
+        """Make sure that the locally delaunay test works."""
 
     def test_vertex_compare(self):
         """Make sure vertices have an order that's reasonable."""
         verts = []
         for i in range(-5, 5):
             for j in range(-5, 5):
-                verts.append(SimplicialComplex.Vertex(Point(i, j, 1)))
+                verts.append(DelT.Vertex(Point(i, j, 1)))
         self.assertEqual(sorted(verts), sorted(verts[::-1]))  # consistency
         self.assertEqual(sorted(verts), sorted(verts))
         self.assertLess(sorted(verts)[0], sorted(verts)[1])
         self.assertNotEqual(verts[0], verts[1])
         self.assertEqual(verts[0], verts[0])
 
-class SimplicialComplexTestCase(unittest.TestCase):
-    """Tests for simplicial complexes.
+        def quick_delaunay_test(*points, expectation=True):
+            """Tests that the faces defined by points[:-1] and points[1:] share
+            an edge that is locally delaunay iff we expect it to be so.
+            """
+            vertices = [DelT.Vertex(point) for point in points]
+            face_1 = DelT.Face(vertices[:-1])
+            face_2 = DelT.Face(vertices[1:])
+            facet_1 = face_1.half_facets[vertices[0]]
+            facet_2 = face_2.half_facets[vertices[-1]]
+            facet_1.twin = facet_2
+            facet_2.twin = facet_1
+            self.assertEqual(facet_1.locally_delaunay(),
+                             expectation)
 
-    Abstractly, a simplicial complex is a collection of simplices that,
-    when you view each simplex as a set of vertices that define it,
-    is closed under subset. Geometrically / topologically, a
-    k-simplex is the convex closure the k+1 vertices that define it.
+        # Test for one dimension first.
+        quick_delaunay_test(Point(-1, 1), Point(2, 1), Point(3, 1),
+                            expectation=True)
+        # points_1 = [Point(-1, 1), Point(2, 1), Point(3, 1)]
+        # vertices_1 = [DelT.Vertex(point) for point in points_1]
+        # half_facet_1 = DelT.HalfFacet(vertices_1[0], vertices_1[1:2],
+        #                              None)
+        # Basic cases in 2 dimensions
+        quick_delaunay_test(Point(0, 2, 1), Point(-1, 0, 1), Point(1, 0, 1),
+                            Point(0, -1, 1), expectation=True)
+        quick_delaunay_test(Point(0, 2, 1), Point(-1, 0, 1), Point(1, 0, 1),
+                            Point(0, -0.3, 1), expectation=False)
+        # Similar basic 3D cases
+        unit_circle_pts_3d = [Point(0, 0, -1, 1), Point(0, 1, 0, 1),
+                              Point(0, -1, 0, 1), Point(1, 0, 0, 1)]
+        quick_delaunay_test(*unit_circle_pts_3d, Point(0, 0, 1.5, 1),
+                            expectation=True)
+        quick_delaunay_test(*unit_circle_pts_3d, Point(0, 0, 0.5, 1),
+                            expectation=False)
 
-    In R^d, I'm calling the d-simplices "faces", the [d-1]-simplices
-    "edges", and the 0-simplices "vertices".
+        # Cases with infinite points in the plane:
+        quick_delaunay_test(Point(0, 1, 0), Point(0.5, -400, 1),
+                            Point(0, 0, 1), Point(-1, -1, 0),
+                            expectation=True)
 
-    This... can't be used to represent Voronoi cells because all the
-    faces have to have d vertices. Shucks. Time to make a polytope instead.
-    """
+    def test_easy_peasy_case(self):
+        """Test with one point and see if the structure makes sense."""
+        point = Point(-3, 2, 1)
+        deltri = DelT([point])
+        self.assertEqual(len(deltri.faces), 3)
+        for face in deltri.faces:
+            self.assertIn(point, face.points())
+            for hafacet in face.half_facets.values():
+                self.assertNotIn(hafacet.opposite,
+                                 hafacet.points())
+        null_twin_count = 0
+        for face in deltri.faces:
+            self.assertEqual(len(face.vertices), 3)
+            for halffacet in face.half_facets.values():
+                if halffacet.twin is None:
+                    null_twin_count += 1
+                else:
+                    self.assertIs(halffacet.twin.twin,
+                                  halffacet)
+        self.assertEqual(null_twin_count, 3)
+        self.assertTrue(deltri.test_delaunaytude())
 
-    def setUp(self):
-        """Setup for other tests.
+    def test_in_general_position(self):
+        """Test rigorously, but only for nice inputs"""
 
-        Implicitly specifies behavior for the constructor.
-
-        It should be safe to write tests that will fail if the structures made
-        here are altered, e.g. by adding more vertices to them. So don't alter
-        these things.
-        """
-        # All points are specified with homogeneous coordinates as usual
-        # All faces are specified manually for the constructor.
-        self.one_d_sim_pts = [Point(-1, 0), Point(-5, 1), Point(-1, 1),
-                              Point(0, 1), Point(4, 1), Point(5, 1),
-                              Point(1, 0)]
-        self.one_d_sim = SimplicialComplex(
-            # vertices=
-            self.one_d_sim_pts,  # Faces in R^1 are intervals
-            # faces=
-            [self.one_d_sim_pts[i:i+2]
-                   for i in range(len(self.one_d_sim_pts) - 1)])
-        # There's a subtlety here in that I only passed one instance
-        # representing each distinct point to the constructor above.
-        # So two points passed to the constructor were equal
-        # iff they were the same instance. I will not do the same for 2-D,
-        # so we can test other behavior.
-
-        self.two_d_sim_pts = [Point(0, -1, 0), Point(1, 1, 0),
-                              Point(-1, 1, 0),  # points at infinity
-                              Point(0, 0, 1)]  # Keep it simple.
-        self.two_d_sim = SimplicialComplex(
-            # vertices=
-            self.two_d_sim_pts,
-            # vertices of faces must be specified in CCW order.
-            # Check: They should be [S, NE, 0], [NE, 0, NW],  [NW, S, 0]
-            # (Also notice if you consider their centers, the faces are
-            #  also passed in CCW order in a sense.)
-            # faces=
-            [[Point(0, -1, 0), Point(1, 1, 0), Point(0, 0, 1)],
-                   [Point(1, 1, 0), Point(0, 0, 1), Point(-1, 1, 0)],
-                   [Point(-1, 1, 0), Point(0, -1, 0), Point(0, 0, 1)]])
-        # TODO make higher dimensional ones of these.
-
-    def test_iterate_simplices(self):
-        """Must be able to iterate all simplices of each dimension.
-
-        (This is because the output we ultimately want is a list of
-        simplices, in some special format.)
-
-        Also, to draw a triangulation on the screen, we can simply
-        draw its 1-skeleton (all its edges and vertices). This will
-        be handy for that also.
-        """
-
-        # The simplices of dimension 0 should be the vertices (though I don't
-        # currently care about their type (could be Point but probably
-        # shouldn't be)
-        self.assertEqual(len(self.one_d_sim_pts),
-                         len([*self.one_d_sim.iter_simplices(0)]))
-        self.assertEqual(len(self.one_d_sim_pts) - 1,
-                         len([*self.one_d_sim.iter_simplices(1)]))
-
-    def test_iterate_simplex_points(self):
-        """Should be able to iterate over the Points in a simplex."""
-        self.two_d_sim
-
-    def test_point_location(self):
-        """Tests point location.
-
-        Given an arbitrary query point, return the face containing that point.
-        """
-        # Test for the 1-D case:
-        # (-2, 1) should be in the face defined by (-5, 1) and (-1, 1).
-        for point in self.one_d_sim.locate(Point(-2, 1)).iter_points():
-            self.assertIn(point, [Point(-5, 1), Point(-1, 1)])
-
-
-        # If the query is in a lower-dimensional simplex, that simplex could be
-        # returned instead of a face, for topological correctness or whatever.
-        # When you do your hyperplane-side tests, make sure that it's not
-        # strictly outside the simplex. But if some of the tests return 0, then
-        # the query point is in the intersection of those hyperplanes.  (If one
-        # returns 0, the query is in the relevant sub-simplex.)
-
-        # Honesly I think the behavior I just described would be super annoying.
-        # I'd rather always return a face.
-        # Rant, rant, rant.
-
-    def test_simplex_split(self):
-        """Test splitting a d-dimensional face into d+1 new faces."""
-        # I could totally be wrong about d+1, but it's correct for
-        # d in [1, 2, 3]. ... A hand-wavy proof follows:
-
-        # Add query point q to some k-simplex:
-        # k-simplex has k+1 vertices therefore also k+1 [k-1]-simplices.
-        # Each [k-1]-simplex has k [k-2]-simplices. Call those S[0], .. S[k-1].
-        # Then for i in range(k), we define a new [k-1] simplex T[i]
-        # by T[i] := S[i] \cup q
-        # There, plus the original face, define a new [k-1]-simplex.
-        # The resulting k [k-1]-simplices, along with the original [k-1]-simplex
-        # over whose [k-2]-simplices we just iterated, define a new
-        # k-simplex.
-        # If you repeat this process you'll get exactly one new
-        # k-simplex for each [k-1]-simplex incident to the original k-simplex.
-        # So yes, the number of new faces is k+1 in general.
-
-        # (Notice the proof wasn't rigorous because I didn't prove that
-        # the new simplices would be well-formed, that their intersections
-        # were either empty or lower-dimensional simplices,
-        # or that their union covers the original k-simplex we were
-        # splitting up. But hey, those things make sense for k < 4,
-        # so I'm no worse than when I started.)
-
-        pass  # TODO obviously
-
-    def test_vertex_hashing(self):
-        """Make sure the hashes of vertices never change"""
-        pass
-
-class PosetTestCase(unittest.TestCase):
-    """This is like a simplicial complex, but instead of simplices it has
-    arbitrary convex polytopes as faces. (So, d-dimensional components
-    need not be defined by d+1 vertices. Although they should have
-    at least d+1 vertices. Also facets aren't closed unter subset.)
-
-    All my tests for SimplicialComplex so far could ALMOST
-    be copied and pasted over here. I could cry.
-    """
-
-    def setUp(self):
-        """Implicitly also tests the constructor. Whatever."""
-        pass  # TODO make some fancy voronoi-diagram looking things
-
-    def test_point_location(self):
-        """Be able to return the face containing a query point."""
-        # Point location by walking (per homework 2 q4) should work
-        # But I wouldn't trust visibility walk in particular.
-        pass  # TODO
-
-    def test_facet_iteration(self):
-        """Enumerate all facets of a given dimension.
-
-        Useful for drawing (e.g. draw the 1-skeleton).
-
-        Very tired, see the corresponding test for SimplicialComplex.
-        """
-        pass  # TODO
-
-
-class TriangulationTestCase(unittest.TestCase):
-    """Tests for the triangulation data structure."""
-
-    def setUp(self):
-        pass
+        points = [Point(0.5, -400, 1), Point(10, 21, 1),
+                  Point(-5, 0, 1), Point(1, 2, 1), Point(2, 1, 1)]
+        deltri = DelT(points, randomize=False)
+        self.assertTrue(deltri.test_delaunaytude())
 
 #     def test_flip(self):
 #         thingy = Triangulation(
 #             points=[Point(0, 0, 1), Point(1, 0, 1), Point(0, 1, 1)])
-# #         TODO
+# #         We do not flip! Nevermind!
+
+if __name__ == '__main__':
+    unittest.main()

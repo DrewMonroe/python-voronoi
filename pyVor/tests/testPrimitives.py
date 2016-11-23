@@ -278,7 +278,8 @@ class PointTestCase(unittest.TestCase):
 
     def test_hashing(self):
         """Make sure point hashing works and does not cause collisions"""
-        # Add 400 points' hashes to a set and make sure 400 things are in the set
+        # Add 400 points' hashes to a set and make sure 400 things are in the
+        # set
         some_hashes = set()
         for x in range(-10, 10):
             for y in range(-10, 10):
@@ -287,6 +288,7 @@ class PointTestCase(unittest.TestCase):
 
         self.assertEqual(hash(Point(0, 1, 2)),
                          hash(Point(0, 1, 2)))
+
 
 class MatrixTestCase(unittest.TestCase):
     """Unit tests for the Matrix class"""

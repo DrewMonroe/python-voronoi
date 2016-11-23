@@ -122,6 +122,14 @@ class PredicatesTestCase(unittest.TestCase):
         self.assertEqual(incircle(*inf_triangle[::-1], Point(-1, 1, 1)),
                          -1)
 
+        # Tricky cases:
+        self.assertEqual(incircle(
+            Point(-1, -1, 0), Point(-3, 2, 1), Point(1, 0, 0), Point(0, 1, 0)),
+                         1)
+        self.assertEqual(incircle(
+            Point(-3, 2, 1), Point(-1, -1, 0), Point(1, 0, 0), Point(0, 1, 0)),
+                         -1)
+
     def test_ccw_euclidean(self):
         """Right now this only tests ccw for 1 and 2 dimensions."""
         # one-dimensional test.
@@ -229,6 +237,14 @@ class PredicatesTestCase(unittest.TestCase):
                              Point(309.7, 1, 0),
                              Point(-0.05, -10, 0)),
                          -1)
+
+        # ANY finite point must satisfy this:
+        queries = [Point(0, 0, 1), Point(1232, 4, 1),
+                   Point(-320, -0.0, 1), Point(-1, -1, 1),
+                   Point(1, 0, 1), Point(0, 1, 1)]
+        for query in queries:
+            self.assertEqual(ccw(Point(0, 1, 0), Point(-1, -1, 0), query), 1)
+            self.assertEqual(ccw(Point(1, 0, 0), Point(0, 1, 0), query), 1)
 
 if __name__ == "__main__":
     unittest.main()

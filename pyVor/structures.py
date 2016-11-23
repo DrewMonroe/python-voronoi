@@ -1,7 +1,35 @@
 #!/usr/bin/env python3
 
+"""Data structures. Enough said."""
+
+from random import shuffle
+# We could seed with /dev/urandom, but
+# "O(n log(n)) for PPT adversaries" is not an important feature
+
+from bisect import bisect_left
+
 from pyVor.primitives import Point
-from pyVor.predicates import ccw
+from pyVor.predicates import ccw, incircle
+
+
+def outer_face_pts(dimension):
+    """Get some points whose simplex contains all of R^{dimension}
+
+    This ought to be a triangulation method, I guess.
+    But I'm leaving it here for now.
+
+    (This is all the standard basis vectors, plus the vector of all -1s. Er,
+    but points, not vectors.)
+    """
+    coords = [0] * (dimension + 1)
+    results = []
+    for i in range(dimension):
+        # Generate a standard basis vector
+        coords[i] = 1
+        results.append(Point(*coords))
+        coords[i] = 0
+    results.append(Point(*(-1 for i in range(dimension)), 0))
+    return results
 
 
 class GeneralPositionError(Exception):
@@ -13,159 +41,8 @@ class GeneralPositionError(Exception):
         super().__init__("Points not in general position", *args)
 
 
-class SimplicialComplex:
-    """A d-dimensional set of faces. Essentially a triangulation."""
-
-    # vertices = []  # The order of these never changes
-    # faces = []
-
-# Process: Input = set of vertices, set of faces (to be closed under subset)
-# Establish total order on vertices. DONE
-# Make faces with tuples of vertices (hashable; in total order)
-# For pairs of faces, if they should share a facet, make it. (Do this by DFS?)
-# (Facets will store directional information, i.e. which side each face is on.) DONE
-# Iterable: both points and Vertices
-
-
-    class Face:
-        """A d-dimensional face. Has d+1 vertices and facets."""
-        # vertices = []  # To be sorted in ascending order
-        # facets = {}  # Will map lists of vertices to faces
-
-        def __init__(self, vertices):
-            """Constructs the face, but doesn't add any facets.
-
-            (This is because of course it is not aware of anything but its own
-            vertices.)
-
-            Sorts the vertices so you don't need to.
-            """
-            vertices.sort()
-            self.vertices = tuple(vertices)
-            self.facets = {}
-
-        def __str__(self):
-            """Return a string representation of this Face"""
-            return "Face({})".format(
-                ','.join(str(vert) for vert in self.vertices))
-
-        def add_facet(self, facet, vertex):
-            """Add a facet, vertex pair.
-
-            The facet stores which directions are inside and outside,
-            so we don't worry about that here.
-            """
-            self.facets[vertex] = facet
-
-        def _generate_facet(self, other, add_to_faces=True):
-            """Construct the common facet, if it exists.
-
-            If it exists, add it to both faces (if add_to_faces=True)
-            and then return it. (Else return None.)
-
-            If a facet exists already, nothing is returned or created,
-            even if the current facet "ought" to be changed. This method
-            is not for changing facets. Really it should only
-            be used by the SimplicialComplex constructor.
-            """
-            if (len(self.vertices) == len(self.facets) or
-                    len(other.vertices) == len(other.facets)):
-                # We don't need more facets.
-                return None
-            # The vertices of each will be in order, so we can
-            # find the relative complements in linear time.
-            # (If something's confusing, consider that I optimized this
-            #  reasonably well but not completely.)
-            i_self = 0  # Some indices.
-            i_other = 0
-            v_self = None  # The vertices not in both self and other
-            v_other = None
-            while (i_self < len(self.vertices) and
-                   i_other < len(other.vertices)):
-                # print("Loop: {}, {}".format(i_self, i_other))
-                if self.vertices[i_self] == other.vertices[i_other]:
-                    i_self += 1
-                    i_other += 1
-                elif (v_self is None and
-                      self.vertices[i_self] < other.vertices[i_other]):
-                    # self.vertices[i_self] is not in other
-                    v_self = self.vertices[i_self]
-                    i_self += 1
-                elif (v_other is None and
-                      self.vertices[i_self] > other.vertices[i_other]):
-                    # other.vertices[i_other] is not in self
-                    v_other = other.vertices[i_other]
-                    i_other += 1
-                else:
-                    # The two faces do not share a facet
-                    # (I.e. they don't have d-1 vertices in common)
-                    # print("FUFUFU")
-                    return None
-            # print("After loop: {}, {}".format(i_self, i_other))
-            # The loop misses this case:
-            if v_self is None and i_self == len(self.vertices) - 1:
-                v_self = self.vertices[i_self]
-            elif v_other is None and i_other == len(other.vertices) - 1:
-                v_other = other.vertices[i_other]
-            if v_self in self.facets:
-                # Don't change anything or return anything. A facet
-                # exists already.
-                # print("FUUFUUFUU")
-                return None
-            if (v_self is None) or (v_other is None):
-                # This should never happen but is happening
-                # print("{}, {}".format(self, other))  # TODO get rid of this
-                # print(len(self.vertices))
-                # print(len(other.vertices))
-                # print(len(other.vertices[0].point))
-                return None
-            facet = SimplicialComplex.Facet([self, other], [v_self, v_other])
-            if add_to_faces:
-                # print("Actually added {} to faces!".format(str(facet)))
-                self.facets[v_self] = facet
-                other.facets[v_other] = facet
-            return facet
-
-        def shared_facet(self, other_face):
-            """If self is adjacent to other_face, return the shared facet.
-
-            Else return None.
-            """
-            for vert in vertices:
-                if vert not in other_face:
-                    facet = self.facets[vert]
-                    if other_face in facet.faces:
-                        return facet
-                    else:
-                        return None
-            # This should be unreachable unless the SimplicialComplex
-            # is half-built somehow:
-            return None
-
-        def iter_vertices(self):
-            """Iterate through vertices in order.
-
-            Currently equivalent to accessing self.vertices.
-            """
-            return self.vertices
-
-        def iter_facets(self):
-            """Iterate through facets, ordered like iter_vertices."""
-            return [self.facets[key] for key in self.iter_vertices()]
-
-        def iter_points(self):
-            """Iterate through points, ordered like iter_vertices."""
-            return [vert.point for vert in self.iter_vertices()]
-
-        def contains(self, point, **kwargs):
-            """Is the query point inside this simplex?
-
-            (You can pass **kwargs for predicates.ccw.)
-            """
-            for facet in self.iter_facets():
-                if facet.lineside(point, **kwargs) != self:
-                    return False
-            return True
+class DelaunayTriangulation:
+    """A Delaunay triangulation of a finite point set."""
 
     class Vertex:
         """Vertices of the simplicial complex, with an order imposed.
@@ -175,6 +52,8 @@ class SimplicialComplex:
         Never reassign the point attribute, since you'll change the hash.
         """
         def __init__(self, point):
+            if not isinstance(point, Point):
+                raise ValueError
             self.point = point
 
         def __gt__(self, other):
@@ -192,12 +71,12 @@ class SimplicialComplex:
             return False
 
         def __le__(self, other):
-            #return hash(self) <= hash(other)
+            # return hash(self) <= hash(other)
             return (self.point == other.point or
                     self < other)
 
         def __ge__(self, other):
-            #return hash(self) >= hash(other)
+            # return hash(self) >= hash(other)
             return other < self
 
         def __str__(self):
@@ -210,110 +89,235 @@ class SimplicialComplex:
         def __hash__(self):
             return hash(self.point)
 
-    class Facet:
-        """A d-1 dimensional face. Has d vertices."""
+    class Face:
+        """The best faces you've ever seen"""
 
-        # faces = (None, None)  # public
-        # _vertices = (None, None)
-        # _sides = (0, 0)
+        def __init__(self, vertices, initial_half_facets=None):
+            # super().__init__(vertices)
+            self.vertices = sorted(vertices)
+            self.half_facets = initial_half_facets or {}
+            for vertex in self.vertices:
+                if vertex in self.half_facets:
+                    # Make sure all the halffacets have self as a face
+                    self.half_facets[vertex].change_face(
+                        vertex, self)
+                else:
+                    self.half_facets[vertex] = DelaunayTriangulation.HalfFacet(
+                        vertex,
+                        [vert for vert in self.vertices if vert != vertex],
+                        self)
+            self.vertex_set = set(self.vertices)  # my new favorite data type
 
-        def __init__(self, faces, vertices):
-            """faces is a pair of faces and vertices is a pair of vertices.
-            This facet will be incident to both faces.
+        def points(self):
+            """Iterate through the points.
 
-            The input should satisfy
-            (vertices[0] in faces[0] and vertices[0] not in faces[1])
-            and similar for vertices[1].
-
-            Incorrect inputs could lead to migraines, so be careful.
-
-            (Facets should typically be constructed by Face._generate_facet)
+            (If you want the vertices, just do self.vertices)
             """
-            # Let's sort our two _vertices in case that matters somehow
-            if vertices[0] > vertices[1]:
-                # Reverse things
-                vertices = vertices[::-1]
-                faces = faces[::-1]
-            # print("Facet created! {}, {}".format([*map(str, faces)],
-            #                                      [*map(str, vertices)]))
-            self.faces = tuple(faces)
-            self._vertices = tuple(vertices)
-            if ccw(*[vert.point for vert in faces[0].iter_vertices()
-                     if vert not in self._vertices],
-                   vertices[0].point) == 1:
-                # Catastrophic if either vertex is in this facet
-                self._sides = (1, -1,)
-            else:
-                self._sides = (-1, 1,)
+            return [vert.point for vert in self.vertices]
 
-        def face(self, number):
-            """Argument is the result of ccw(*self, point) for a point in the
-            returned face.
+        def iter_facets(self):
+            """Iterate through the half-facets.
+
+            Face.half_facets.values() should be replaced with this everywhere
+            you see it.
             """
-            if number not in self._sides:
-                raise ValueError("Argument must be 1 or -1")
-            else:
-                return self.faces[self._sides.index(number)]
+            return self.half_facets.values()
 
-        def lineside(self, point, **kwargs):
-            """Takes a point, not a vertex. Returns a face.
+    class HalfFacet:
+        """Better than a Facet. Also, the pun is honestly by accident.
 
-            **kwargs are passed directly to predicates.ccw.
-            """
-            answer = ccw(*self.iter_points(), point, **kwargs)  # -1, 0, or 1
-            if answer != 0:
-                return self.face(answer)
+        Supports lineside, twin, iteration of points or vertices,
+        and opposite (i.e. the vertex opposite this HF).
+        """
+
+        def __init__(self, opposite, vertices, face, twin=None):
+            """Constructor. See class docstring"""
+            self.face = face
+            self._vertices = tuple(sorted(vertices))  # could store implicitly
+            self.opposite = opposite
+            if twin and twin.side:
+                # Save a little time
+                self.side = -1 * twin.side
             else:
-                # The point is co-planar with this face. Shucks.
+                self.side = ccw(*self.points(), opposite.point)
+            if self.side == 0:
                 raise GeneralPositionError
+            self.twin = twin
 
-    def __init__(self, points, face_sets, outside_face=None):
-        """Constructor for SimplicialComplex
+        def vertices(self):
+            """get the vertices, which may be stored implicitly"""
+            return self._vertices
 
-        Pass a set of points and a list of "faces", which are
-        simply subsets of the points (of size d+1, where d is
-        the dimension of the points).
+        def points(self):
+            """Get a list of points in this halffacet"""
+            return [vert.point for vert in self.vertices()]
+
+        def lineside(self, point):
+            """Return 1, 0, or -1 respectively if the given point is:
+
+            On the same side as self.opposite
+            Co(hyper)planer with this facet
+            On the other side of this facet
+            """
+            # Needs adjustment if we allow _side to be 0
+            return ccw(*self.points(), point) * self.side
+
+        def change_face(self, opposite, face):
+            """Switch the incidence properties of this halffacet"""
+            # Needs to be changed if we start allowing _side == 0
+            # assert isinstance(opposite, DelaunayTriangulation.Vertex)
+            self.opposite = opposite
+            self.face = face
+
+        def locally_delaunay(self, alt_vertex=None):
+            """Return True if locally delaunay (including or not including
+            weird boundary conditions (include for the first try))
+
+            if no vertex given, use self.opposite
+
+            Of course weird things will happen if the given vertex is on the
+            wrong side.
+            """
+            if not self.twin:
+                # We're bordering on the infinite, so to speak.
+                return True
+            if not alt_vertex:
+                alt_vertex = self.opposite
+            # Use self.twin.side to correct for the orientation of self.twin
+            result = self.twin.side * incircle(
+                *self.twin.points(), self.twin.opposite.point,
+                alt_vertex.point)
+            return result <= 0  # strict inequality might not halt, I think
+
+        def __str__(self):
+            return ':'.join([
+                str(key) + str(value) for key, value in self.__dict__.items()
+                if not isinstance(value, type(self))])
+
+    def __init__(self, points, randomize=True, homogeneous=True):
+        """Construct the delaunay triangulation of the point list"""
+        if not homogeneous:
+            points = [pt.lift(lambda x: 1) for pt in points]
+            homogeneous = True  # just for emphasis
+        dimension = len(points[0]) - 1  # -1 because homogenous
+        outer_face = [*map(self.Vertex, outer_face_pts(dimension))]
+        # The resulting "outer face" contains every point in R^d
+        self.faces = [self.Face(outer_face)]
+        self.vertices = list(self.faces[0].vertices)
+        if randomize:
+            shuffle(points)  # randomize this thing (in place)
+        self.point_history = []  # per request of gui folks
+        for point in points:
+            self.delaunay_add(point)
+
+    def delaunay_add(self, point):
+        """Add a point and then recover the delaunay property"""
+        # print('\n{}'.format(len(self.faces)))
+        self.point_history.append(point)
+        # dead_face = self.locate(point)
+        hf_stack = self.face_shatter(self.locate(point))
+        new_vert = self.Vertex(point)
+        # insert the new vertex, keeping the list sorted
+        self.vertices.insert(bisect_left(self.vertices, new_vert), new_vert)
+        ld_halffacets = []  # locally delaunay halffacets
+        while hf_stack:
+            free_facet = hf_stack.pop()
+            if free_facet.locally_delaunay(new_vert):
+                ld_halffacets.append(free_facet)
+            else:
+                # Add them all to the queue/stack/stueue/quack
+                if free_facet.twin.face not in self.faces:
+                    continue
+                hf_stack.extend(self.facet_pop(
+                    free_facet, free_facet.twin.face))
+        new_faces = []
+        for halffacet in ld_halffacets:
+            # bugger all, I have to link up all these edges now
+            new_faces.append(self.Face(
+                [*halffacet.vertices(), new_vert],
+                initial_half_facets={new_vert: halffacet}))
+        # Now link the halffaces to their twins, by brute force
+        for i in range(len(new_faces)):
+            for j in range(i+1, len(new_faces)):
+                diff = new_faces[i].vertex_set.symmetric_difference(
+                    new_faces[j].vertex_set)
+                if len(diff) == 2:
+                    # Note that one vertex must be from each, since
+                    # they have the same number of vertices
+                    link_us = []
+                    for vert in diff:
+                        if vert in new_faces[i].vertex_set:
+                            link_us.append(new_faces[i].half_facets[vert])
+                        else:
+                            link_us.append(new_faces[j].half_facets[vert])
+                    # Now link them
+                    link_us[0].twin = link_us[1]
+                    link_us[1].twin = link_us[0]
+        self.faces.extend(new_faces)
+        # print('is it so bad? {}'.format(self.faces))
+        # finished
+
+    def face_shatter(self, face):
+        """Remove a face from self.faces and return all of its HalfFacets.
+
+        (We shall do science to them.)
         """
-        self.vertices = sorted([self.Vertex(pt) for pt in points])
-        # We have to make a bunch of faces, now. They won't have facets yet.
-        # Convert all the faces to vertices:
-        points_to_verts = {vert.point: vert for vert in self.vertices}
-        face_sets = [[*map(lambda p: points_to_verts[p], fs)]
-                     for fs in face_sets]
-        self.faces = []
-        for fs in face_sets:
-            self.faces.append(self.Face(fs))  # Face does its own sorting
-        # Now to make Facets between Faces:
-        # Let's do this the naive, quadratic way.
-        # (Quadratic _generate_facet calls in len(faces).)
-        # If we see huge enough point sets in low dimensions,
-        # there could maybe be a better way, though it would be
-        # rather complicated.
-        # self.outside_face = self.Face([
-        # TODO think about how to handle outside face
-        #     vert in self.vertices if vert 
-        for i in range(len(self.faces)):
-            for j in range(i + 1, len(self.faces)):
-                self.faces[i]._generate_facet(self.faces[j],
-                                              add_to_faces=True)
-            if len(self.faces[i].facets) != len(self.faces[i].vertices):
-                
+        self.faces.remove(face)  # ew, linear time.
+        return [*face.iter_facets()]
+        # try:
+        #     print('here goes {}'.format(self.faces))
+        #     print(str(face))
+        #     self.faces.remove(face)  # ew, linear time.
+        #     print('there went {}'.format(self.faces))
+        #     return [*face.half_facets.values()]
+        # except ValueError:
+        #     print(self.faces)
+        #     raise
 
-    def locate(self, point, assume_delaunay=True):
-        """Return the face containing the given point.
+    def facet_pop(self, facet, fsopuwmcd=None):
+        """Push a pin through the facet and out into the twin face, shattering
+        facet.twin.face and also getting rid of facet and facet.twin.
 
-        If no face contains the point, return None.
+        Or explicitly specify the face to shatter if you like.
 
-        If assume_delaunay=True, the algorithm may be faster
-        but is only guaranteed to halt if the SimplicialComplex
-        is in fact Delaunay.
+        "face_so_other_people_understand_what_my_code_does" is the kwarg.
         """
-        # print('About to be problems for {}'.format(str(self)))
-        # for face in self.faces:
-        #     for vertex in face.iter_vertices():
-        #         if vertex not in face.facets:
-        #             print("{} {}".format(face, vertex))
+        if not fsopuwmcd:
+            fsopuwmcd = facet.twin.face
+        return [fct for fct in self.face_shatter(fsopuwmcd) if fct !=
+                facet.twin]
+
+    def locate(self, point):
+        """Point location with visibility walk. Straight from my homework."""
+        not_done = True
+        current_face = self.faces[0]
+        while not_done:
+            not_done = False
+            for halffacet in current_face.iter_facets():
+                if halffacet.lineside(point) == -1:
+                    current_face = halffacet.twin.face
+                    not_done = True
+                    break
+        return current_face
+
+    def test_delaunaytude(self):
+        """Make sure every facet is locally delaunay."""
         for face in self.faces:
-            if face.contains(point):
-                return face
-        return None
+            for halffacet in face.iter_facets():
+                if not halffacet.locally_delaunay():
+                    # print(halffacet)
+                    return False
+        return True
+
+# face_shatter delete face and return all facets of it. (As inner
+# HalfFacets)
+
+# face_pop(face, HalfFacet) - like face-shatter but one
+# HalfFace is destroyed also (The image I have of this is like poking
+# a pin into a Face through a certain facet.)
+
+# def face_make(vertex, half_facet):
+#     make the face defined by those two things and link everything all up
+#     (Need to deal with linking the faces of the star together)
+
+# half_facets solve the problem of storing an outer face. Nice.
