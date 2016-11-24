@@ -94,7 +94,8 @@ class DelaunayTriangulation:
 
         def __init__(self, vertices, initial_half_facets=None):
             # super().__init__(vertices)
-            self.vertices = sorted(vertices)
+            # self.vertices = sorted(vertices)
+            self.vertices = frozenset(vertices)
             self.half_facets = initial_half_facets or {}
             for vertex in self.vertices:
                 if vertex in self.half_facets:
@@ -106,7 +107,7 @@ class DelaunayTriangulation:
                         vertex,
                         [vert for vert in self.vertices if vert != vertex],
                         self)
-            self.vertex_set = set(self.vertices)  # my new favorite data type
+            #self.vertices = set(self.vertices)  # my new favorite data type
 
         def points(self):
             """Iterate through the points.
@@ -123,6 +124,10 @@ class DelaunayTriangulation:
             """
             return self.half_facets.values()
 
+        def __hash__(self):
+            """Hash, based only on the vertices contained here."""
+            return hash(self.vertices)
+
     class HalfFacet:
         """Better than a Facet. Also, the pun is honestly by accident.
 
@@ -133,10 +138,10 @@ class DelaunayTriangulation:
         def __init__(self, opposite, vertices, face, twin=None):
             """Constructor. See class docstring"""
             self.face = face
-            self._vertices = tuple(sorted(vertices))  # could store implicitly
+            self._vertices = frozenset(vertices)  # could store implicitly
             self.opposite = opposite
             if twin and twin.side:
-                # Save a little time
+                # Save a little time.
                 self.side = -1 * twin.side
             else:
                 self.side = ccw(*self.points(), opposite.point)
@@ -194,7 +199,7 @@ class DelaunayTriangulation:
                 str(key) + str(value) for key, value in self.__dict__.items()
                 if not isinstance(value, type(self))])
 
-    def __init__(self, points, randomize=True, homogeneous=True):
+    def __init__(self, points, randomize=True, homogeneous=True, name='anon'):
         """Construct the delaunay triangulation of the point list"""
         if not homogeneous:
             points = [pt.lift(lambda x: 1) for pt in points]
@@ -202,8 +207,9 @@ class DelaunayTriangulation:
         dimension = len(points[0]) - 1  # -1 because homogenous
         outer_face = [*map(self.Vertex, outer_face_pts(dimension))]
         # The resulting "outer face" contains every point in R^d
-        self.faces = [self.Face(outer_face)]
-        self.vertices = list(self.faces[0].vertices)
+        self.faces = set([self.Face(outer_face)])
+        self.vertices = set(outer_face)
+        self.name = name  # for debugging. unittest is too parallel for me
         if randomize:
             shuffle(points)  # randomize this thing (in place)
         self.point_history = []  # per request of gui folks
@@ -215,55 +221,61 @@ class DelaunayTriangulation:
         # print('\n{}'.format(len(self.faces)))
         self.point_history.append(point)
         # dead_face = self.locate(point)
-        hf_stack = self.face_shatter(self.locate(point))
+        hf_stack = set(self._face_shatter(self.locate(point)))
+        # already_processed = set()
         new_vert = self.Vertex(point)
-        # insert the new vertex, keeping the list sorted
-        self.vertices.insert(bisect_left(self.vertices, new_vert), new_vert)
-        ld_halffacets = []  # locally delaunay halffacets
+        self.vertices.add(new_vert)
+        # (bisect_left(self.vertices, new_vert), new_vert)
+        ld_halffacets = set()  # locally delaunay halffacets
         while hf_stack:
             free_facet = hf_stack.pop()
+            # if free_facet in already_processed:
+            #     print('useful')  # Never got printed.
+            #     continue
+            # else:
+            #     already_processed.add(free_facet)
             if free_facet.locally_delaunay(new_vert):
-                ld_halffacets.append(free_facet)
+                ld_halffacets.add(free_facet)
             else:
                 # Add them all to the queue/stack/stueue/quack
                 if free_facet.twin.face not in self.faces:
                     continue
-                hf_stack.extend(self.facet_pop(
+                hf_stack.update(self._facet_pop(
                     free_facet, free_facet.twin.face))
         new_faces = []
         for halffacet in ld_halffacets:
-            # bugger all, I have to link up all these edges now
+            # I have to link up all these edges now
             new_faces.append(self.Face(
                 [*halffacet.vertices(), new_vert],
                 initial_half_facets={new_vert: halffacet}))
         # Now link the halffaces to their twins, by brute force
-        for i in range(len(new_faces)):
-            for j in range(i+1, len(new_faces)):
-                diff = new_faces[i].vertex_set.symmetric_difference(
-                    new_faces[j].vertex_set)
+        for face_0 in new_faces:
+            for face_1 in new_faces:  # j in range(i+1, len(new_faces)):
+                diff = face_0.vertices.symmetric_difference(
+                    face_1.vertices)
                 if len(diff) == 2:
                     # Note that one vertex must be from each, since
                     # they have the same number of vertices
                     link_us = []
                     for vert in diff:
-                        if vert in new_faces[i].vertex_set:
-                            link_us.append(new_faces[i].half_facets[vert])
+                        if vert in face_0.vertices:
+                            link_us.append(face_0.half_facets[vert])
                         else:
-                            link_us.append(new_faces[j].half_facets[vert])
+                            link_us.append(face_1.half_facets[vert])
                     # Now link them
                     link_us[0].twin = link_us[1]
                     link_us[1].twin = link_us[0]
-        self.faces.extend(new_faces)
-        # print('is it so bad? {}'.format(self.faces))
+        self.faces.update(new_faces)#[face for face in new_faces if face not in self.faces])
+        print('is it so bad? {}, {}'.format(len(self.faces), self.name))
         # finished
 
-    def face_shatter(self, face):
+    def _face_shatter(self, face):
         """Remove a face from self.faces and return all of its HalfFacets.
 
         (We shall do science to them.)
         """
-        self.faces.remove(face)  # ew, linear time.
-        return [*face.iter_facets()]
+        self.faces.remove(face)  # constant time set operation win!
+        return face.iter_facets()
         # try:
         #     print('here goes {}'.format(self.faces))
         #     print(str(face))
@@ -274,7 +286,7 @@ class DelaunayTriangulation:
         #     print(self.faces)
         #     raise
 
-    def facet_pop(self, facet, fsopuwmcd=None):
+    def _facet_pop(self, facet, fsopuwmcd=None):
         """Push a pin through the facet and out into the twin face, shattering
         facet.twin.face and also getting rid of facet and facet.twin.
 
@@ -284,13 +296,13 @@ class DelaunayTriangulation:
         """
         if not fsopuwmcd:
             fsopuwmcd = facet.twin.face
-        return [fct for fct in self.face_shatter(fsopuwmcd) if fct !=
+        return [fct for fct in self._face_shatter(fsopuwmcd) if fct !=
                 facet.twin]
 
     def locate(self, point):
         """Point location with visibility walk. Straight from my homework."""
         not_done = True
-        current_face = self.faces[0]
+        current_face = self._arbitrary_face()
         while not_done:
             not_done = False
             for halffacet in current_face.iter_facets():
@@ -298,6 +310,7 @@ class DelaunayTriangulation:
                     current_face = halffacet.twin.face
                     not_done = True
                     break
+        print("Found {} in {}".format(point, current_face.points()))
         return current_face
 
     def test_delaunaytude(self):
@@ -309,7 +322,44 @@ class DelaunayTriangulation:
                     return False
         return True
 
-# face_shatter delete face and return all facets of it. (As inner
+    def face_point_sets(self, homogeneous=False):
+        """Return a set containing a bunch of frozensets of points.
+
+        Of course the frozensets represent the faces of the triangulation.
+        """
+        result = set()
+        # hidden_vertices = frozenset(
+        #     [self.Vertex(point) for point in outer_face_pts(self.dimension())])
+        # for face in self.faces:
+        #     if face.vertices.isdisjoint(hidden_vertices):
+        #         result.add(frozenset([
+        #             vert.point[slice(None) if homogeneous else slice(-1)]
+        #             for vert in face.vertices]))
+        #     else:
+        #         print("It works a little")
+                
+
+        hidden_points = frozenset(outer_face_pts(self.dimension()))
+        for face in self.faces:
+            subresult = frozenset([  #[slice(None) if homogeneous else slice(-1)]
+                vert.point for vert in face.vertices])
+            if hidden_points.isdisjoint(subresult):
+                result.add(frozenset([
+                    point[slice(None) if homogeneous else slice(-1)]
+                    for point in subresult]))
+            else:
+                print("It works a little")
+        return result
+
+    def dimension(self):
+        """get the dimension in some standard way"""
+        return len(next(iter(self.vertices)).point) - 1  # -1 because homogeneous
+
+    def _arbitrary_face(self):
+        """Get an arbitrary face of the triangulation"""
+        return next(iter(self.faces))  # Hideous
+
+# _face_shatter delete face and return all facets of it. (As inner
 # HalfFacets)
 
 # face_pop(face, HalfFacet) - like face-shatter but one

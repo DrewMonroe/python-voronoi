@@ -12,9 +12,6 @@ from pyVor.structures import DelaunayTriangulation as DelT
 class DelaunayTriangulationTestCase(unittest.TestCase):
     """Tests for the triangulation data structure."""
 
-    def test_locally_delaunay(self):
-        """Make sure that the locally delaunay test works."""
-
     def test_vertex_compare(self):
         """Make sure vertices have an order that's reasonable."""
         verts = []
@@ -27,6 +24,9 @@ class DelaunayTriangulationTestCase(unittest.TestCase):
         self.assertNotEqual(verts[0], verts[1])
         self.assertEqual(verts[0], verts[0])
 
+    def test_locally_delaunay(self):
+        """Make sure that the locally delaunay test works."""
+
         def quick_delaunay_test(*points, expectation=True):
             """Tests that the faces defined by points[:-1] and points[1:] share
             an edge that is locally delaunay iff we expect it to be so.
@@ -38,8 +38,16 @@ class DelaunayTriangulationTestCase(unittest.TestCase):
             facet_2 = face_2.half_facets[vertices[-1]]
             facet_1.twin = facet_2
             facet_2.twin = facet_1
+
+            self.assertEqual(facet_1.lineside(facet_1.opposite.point),
+                             1)
+            self.assertEqual(facet_1.lineside(facet_1.opposite.point),
+                             1)
+
             self.assertEqual(facet_1.locally_delaunay(),
                              expectation)
+            self.assertEqual(facet_1.locally_delaunay(),
+                             facet_2.locally_delaunay())
 
         # Test for one dimension first.
         quick_delaunay_test(Point(-1, 1), Point(2, 1), Point(3, 1),
@@ -64,6 +72,10 @@ class DelaunayTriangulationTestCase(unittest.TestCase):
         # Cases with infinite points in the plane:
         quick_delaunay_test(Point(0, 1, 0), Point(0.5, -400, 1),
                             Point(0, 0, 1), Point(-1, -1, 0),
+                            expectation=True)
+
+        quick_delaunay_test(Point(-2, 0, 1), Point(-0.6, 3.2, 1),
+                            Point(3.2, 2.1, 1), Point(1, 0, 0),
                             expectation=True)
 
     def test_easy_peasy_case(self):
@@ -96,10 +108,41 @@ class DelaunayTriangulationTestCase(unittest.TestCase):
         deltri = DelT(points, randomize=False)
         self.assertTrue(deltri.test_delaunaytude())
 
+
+    def test_output_for_a_picture_from_my_notebook(self):
+        """Test the output for a 2D case transfered from a notebook"""
+
+        # First just make sure face equality works like I hope:
+        self.assertEqual(set(frozenset([Point(0, 3.7)])),
+                         set(frozenset([Point(0, 3.7)])))
+
+        del_tri = DelT([Point(-0.6, 3.2), Point(3.2, 2.1),
+                        Point(-2, 0), Point(1, -0.2), Point(3.6, -0.3),
+                        Point(-1.4, -2.1), Point(2.5, -1.7)],
+                       homogeneous=False, name="harambe",
+                       randomize=False)
+        self.assertTrue(del_tri.test_delaunaytude())
+        face_sets = set([
+            frozenset(face) for face in del_tri.face_point_sets(homogeneous=False)])
+        expected_face_sets = set([
+            frozenset([Point(-2, 0), Point(-0.6, 3.2), Point(1, -0.2)]),
+            frozenset([Point(3.2, 2.1), Point(-0.6, 3.2), Point(1, -0.2)]),
+            frozenset([Point(3.2, 2.1), Point(3.6, -0.3), Point(1, -0.2)]),
+            frozenset([Point(2.5, -1.7), Point(3.6, -0.3), Point(1, -0.2)]),
+            frozenset([Point(2.5, -1.7), Point(-1.4, -2.1), Point(1, -0.2)]),
+            frozenset([Point(-1.4, -2.1), Point(-2, 0), Point(1, -0.2)])])
+        # Note that equality of faces works exactly like you'd want.  The test
+        # even nicely tells you the differences between the sets, if it fails.
+        for face_set in face_sets:
+            self.assertEqual(len(face_set), 3)  # triangles have 3 vertices
+        self.assertEqual(face_sets, expected_face_sets)
+
+
 #     def test_flip(self):
 #         thingy = Triangulation(
 #             points=[Point(0, 0, 1), Point(1, 0, 1), Point(0, 1, 1)])
 # #         We do not flip! Nevermind!
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -130,6 +130,18 @@ class PredicatesTestCase(unittest.TestCase):
             Point(-3, 2, 1), Point(-1, -1, 0), Point(1, 0, 0), Point(0, 1, 0)),
                          -1)
 
+        # The following tests are based on pencil-and-paper drawings
+        # as well as hours spent debugging the DelaunayTriangulation.
+
+        self.assertEqual(incircle(
+            Point(1, 0, 0), Point(-0.6, 3.2, 1), Point(3.2, 2.1, 1),
+            Point(-2, 0, 1)),
+                         -1)
+
+        self.assertEqual(incircle(
+            Point(-2, 0), Point(-0.6, 3.2), Point(0, 1, 0), Point(1, 0, 0)),
+                         -1)
+
     def test_ccw_euclidean(self):
         """Right now this only tests ccw for 1 and 2 dimensions."""
         # one-dimensional test.
