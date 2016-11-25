@@ -9,14 +9,16 @@ import re
 from pyVor.structures import DelaunayTriangulation as DelT
 from pyVor.primitives import Point
 
+
 def line_to_point(line):
     """Convert a line of user input to a point.
 
-    Homogeneous coordinates are not added, on the grounds that this part of the code
-    really oughtn't to do any math.
+    Homogeneous coordinates are not added, on the grounds that this part of
+    the code really oughtn't to do any math.
     """
     line = line.strip("() \t\n")
     return Point(*(float(x) for x in line.split()))
+
 
 def main():
     """See argument parser or output of --help"""

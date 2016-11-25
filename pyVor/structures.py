@@ -107,7 +107,7 @@ class DelaunayTriangulation:
                         vertex,
                         [vert for vert in self.vertices if vert != vertex],
                         self)
-            #self.vertices = set(self.vertices)  # my new favorite data type
+            # self.vertices = set(self.vertices)  # my new favorite data type
 
         def points(self):
             """Iterate through the points.
@@ -265,7 +265,8 @@ class DelaunayTriangulation:
                     # Now link them
                     link_us[0].twin = link_us[1]
                     link_us[1].twin = link_us[0]
-        self.faces.update(new_faces)#[face for face in new_faces if face not in self.faces])
+        # [face for face in new_faces if face not in self.faces])
+        self.faces.update(new_faces)
         print('is it so bad? {}, {}'.format(len(self.faces), self.name))
         # finished
 
@@ -329,7 +330,7 @@ class DelaunayTriangulation:
         """
         result = set()
         # hidden_vertices = frozenset(
-        #     [self.Vertex(point) for point in outer_face_pts(self.dimension())])
+        #   [self.Vertex(point) for point in outer_face_pts(self.dimension())])
         # for face in self.faces:
         #     if face.vertices.isdisjoint(hidden_vertices):
         #         result.add(frozenset([
@@ -337,11 +338,11 @@ class DelaunayTriangulation:
         #             for vert in face.vertices]))
         #     else:
         #         print("It works a little")
-                
 
         hidden_points = frozenset(outer_face_pts(self.dimension()))
         for face in self.faces:
-            subresult = frozenset([  #[slice(None) if homogeneous else slice(-1)]
+            # [slice(None) if homogeneous else slice(-1)]
+            subresult = frozenset([
                 vert.point for vert in face.vertices])
             if hidden_points.isdisjoint(subresult):
                 result.add(frozenset([
@@ -353,7 +354,8 @@ class DelaunayTriangulation:
 
     def dimension(self):
         """get the dimension in some standard way"""
-        return len(next(iter(self.vertices)).point) - 1  # -1 because homogeneous
+        # -1 because homogeneous
+        return len(next(iter(self.vertices)).point) - 1
 
     def _arbitrary_face(self):
         """Get an arbitrary face of the triangulation"""
