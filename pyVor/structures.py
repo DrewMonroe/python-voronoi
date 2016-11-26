@@ -314,7 +314,7 @@ class DelaunayTriangulation:
         print("Found {} in {}".format(point, current_face.points()))
         return current_face
 
-    def test_delaunaytude(self):
+    def test_is_delaunay(self):
         """Make sure every facet is locally delaunay."""
         for face in self.faces:
             for halffacet in face.iter_facets():

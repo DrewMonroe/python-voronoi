@@ -38,7 +38,7 @@ def main():
         if not_empty.match(line):
             points.append(line_to_point(line))
     del_tri = DelT(points, homogeneous=args.homogeneous)
-    if not del_tri.test_delaunaytude():
+    if not del_tri.test_is_delaunay():
         print("It might not have worked. Oh, well!")
     print("Done!")  # I'm so mean. TODO output something reasonable here.
     exit(1337)

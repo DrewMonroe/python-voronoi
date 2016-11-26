@@ -98,7 +98,7 @@ class DelaunayTriangulationTestCase(unittest.TestCase):
                     self.assertIs(halffacet.twin.twin,
                                   halffacet)
         self.assertEqual(null_twin_count, 3)
-        self.assertTrue(deltri.test_delaunaytude())
+        self.assertTrue(deltri.test_is_delaunay())
 
     def test_in_general_position(self):
         """Test rigorously, but only for nice inputs"""
@@ -106,7 +106,7 @@ class DelaunayTriangulationTestCase(unittest.TestCase):
         points = [Point(0.5, -400, 1), Point(10, 21, 1),
                   Point(-5, 0, 1), Point(1, 2, 1), Point(2, 1, 1)]
         deltri = DelT(points, randomize=False)
-        self.assertTrue(deltri.test_delaunaytude())
+        self.assertTrue(deltri.test_is_delaunay())
 
     def test_output_for_a_picture_from_my_notebook(self):
         """Test the output for a 2D case transfered from a notebook"""
@@ -120,7 +120,7 @@ class DelaunayTriangulationTestCase(unittest.TestCase):
                         Point(-1.4, -2.1), Point(2.5, -1.7)],
                        homogeneous=False, name="harambe",
                        randomize=False)
-        self.assertTrue(del_tri.test_delaunaytude())
+        self.assertTrue(del_tri.test_is_delaunay())
         face_sets = set([
             frozenset(face) for face in
             del_tri.face_point_sets(homogeneous=False)])
