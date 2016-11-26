@@ -108,7 +108,6 @@ class DelaunayTriangulationTestCase(unittest.TestCase):
         deltri = DelT(points, randomize=False)
         self.assertTrue(deltri.test_delaunaytude())
 
-
     def test_output_for_a_picture_from_my_notebook(self):
         """Test the output for a 2D case transfered from a notebook"""
 
@@ -123,7 +122,8 @@ class DelaunayTriangulationTestCase(unittest.TestCase):
                        randomize=False)
         self.assertTrue(del_tri.test_delaunaytude())
         face_sets = set([
-            frozenset(face) for face in del_tri.face_point_sets(homogeneous=False)])
+            frozenset(face) for face in
+            del_tri.face_point_sets(homogeneous=False)])
         expected_face_sets = set([
             frozenset([Point(-2, 0), Point(-0.6, 3.2), Point(1, -0.2)]),
             frozenset([Point(3.2, 2.1), Point(-0.6, 3.2), Point(1, -0.2)]),
