@@ -139,7 +139,7 @@ class PredicatesTestCase(unittest.TestCase):
                          -1)
 
         self.assertEqual(incircle(
-            Point(-2, 0), Point(-0.6, 3.2), Point(0, 1, 0), Point(1, 0, 0)),
+            Point(-2, 0, 1), Point(-0.6, 3.2, 1), Point(0, 1, 0), Point(1, 0, 0)),
                          -1)
 
     def test_ccw_euclidean(self):
