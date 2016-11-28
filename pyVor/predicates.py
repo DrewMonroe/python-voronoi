@@ -54,10 +54,10 @@ def incircle(*points, homogeneous=True):
 
     if homogeneous:
         # The points already have homogeneous coordinates
-        vectors = [pt - Point(*([0] * len(pt))) for pt in points]
+        vectors = [pt.to_vector() for pt in points]
     else:
         # We'll give each point a homogeneous coordinate of 1
-        vectors = [(pt - Point(*([0] * len(pt)))).lift() for pt in points]
+        vectors = [(pt.to_vector()).lift() for pt in points]
 
     vectors = [vector.lift(lambda v: v[:-1].norm_squared())
                for vector in vectors]
