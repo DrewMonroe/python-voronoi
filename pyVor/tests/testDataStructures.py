@@ -7,6 +7,7 @@ import unittest
 import csv
 import os
 from pyVor.primitives import Point
+from pyVor.primitives import Vector
 from pyVor.structures import DelaunayTriangulation as DelT
 
 
@@ -132,7 +133,6 @@ class DelaunayTriangulationTestCase(unittest.TestCase):
             frozenset([Point(2.5, -1.7), Point(3.6, -0.3), Point(1, -0.2)]),
             frozenset([Point(2.5, -1.7), Point(-1.4, -2.1), Point(1, -0.2)]),
             frozenset([Point(-1.4, -2.1), Point(-2, 0), Point(1, -0.2)])])
-        print(expected_face_sets)
         # Note that equality of faces works exactly like you'd want.  The test
         # even nicely tells you the differences between the sets, if it fails.
         for face_set in face_sets:
@@ -153,8 +153,6 @@ class DelaunayTriangulationTestCase(unittest.TestCase):
         face_sets = set([
             frozenset(face)
             for face in del_tri.face_point_sets(homogeneous=False)])
-        print(len(set([frozenset(face)
-                       for face in del_tri.face_point_sets(homogeneous=False)])))
         fn = os.path.join(os.path.dirname(__file__), 'data/dt.csv')
         f = open(fn)
         triangles = list(csv.reader(f))

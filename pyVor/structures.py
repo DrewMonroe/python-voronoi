@@ -208,9 +208,11 @@ class DelaunayTriangulation:
         for point in points:
             self.delaunay_add(point)
 
-    def delaunay_add(self, point):
+    def delaunay_add(self, point, homogeneous=True):
         """Add a point and then recover the delaunay property"""
         # print('\n{}'.format(len(self.faces)))
+        if homogeneous is False:
+            point = point.lift(lambda x: 1)
         self.point_history.append(point)
         # dead_face = self.locate(point)
         hf_stack = set(self._face_shatter(self.locate(point)))
@@ -328,8 +330,6 @@ class DelaunayTriangulation:
                 result.add(frozenset([
                     point[slice(None) if homogeneous else slice(-1)]
                     for point in subresult]))
-            else:
-                print("It works a little")
         return result
 
     def dimension(self):
