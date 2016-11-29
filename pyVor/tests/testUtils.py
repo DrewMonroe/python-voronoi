@@ -2,7 +2,7 @@
 
 import unittest
 
-from pyVor.primitives import Point, Vector, Matrix
+from pyVor.primitives import Point
 from pyVor.utils import circumcenter
 
 

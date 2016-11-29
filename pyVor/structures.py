@@ -6,8 +6,6 @@ from random import shuffle
 # We could seed with /dev/urandom, but
 # "O(n log(n)) for PPT adversaries" is not an important feature
 
-from bisect import bisect_left
-
 from pyVor.primitives import Point
 from pyVor.predicates import ccw, incircle
 

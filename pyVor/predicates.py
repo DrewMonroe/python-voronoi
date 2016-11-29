@@ -2,7 +2,7 @@
 
 """This is a collection of linear predicate implementations."""
 
-from pyVor.primitives import Matrix, Vector, Point
+from pyVor.primitives import Matrix, Point
 
 
 def ccw(*points, homogeneous=True):
