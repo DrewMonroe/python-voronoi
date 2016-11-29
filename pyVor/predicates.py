@@ -1,12 +1,7 @@
 #!/usr/bin/env python3
 
-"""This is a collection of linear predicate implementations.
+"""This is a collection of linear predicate implementations."""
 
-It also has basic stuff like 'lift' and 'norm', and also a thing
-to make vectors / document how we should make vectors.
-"""
-
-# from scipy import linalg # supposedly faster, but doesn't have everything
 from pyVor.primitives import Matrix, Vector, Point
 
 
@@ -40,17 +35,12 @@ def ccw(*points, homogeneous=True):
 
 
 def incircle(*points, homogeneous=True):
-    """In R^2, is the last argument inside the circle defined by the
-    previous arguments?
-    1 if inside, -1 if outside, and 0 if all cocircular.
+    """Returns 1 if the last point is inside the circle defined by the other
+    three, -1 if outside, and 0 if all cocircular.
 
     The points are interpreted as having extended homogenious
     coordinates unless homogeneous=False is passed.
     """
-    # if debug and homogeneous:
-    #     # Checking for human error. Eventually we can turn debug off.
-    #     if not sum([p[-1] == 1 or p[-1] == 0 for p in points]):
-    #         raise ValueError("These points are not homogeneous!")
 
     if homogeneous:
         # The points already have homogeneous coordinates

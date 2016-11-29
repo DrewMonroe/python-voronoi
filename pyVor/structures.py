@@ -60,8 +60,6 @@ class DelaunayTriangulation:
             # return hash(self) > hash(other)
             return other < self
 
-        # def __lt__(self, other):  # Used exclusively by sort builtin.
-        #     return hash(self) < hash(other)
         def __lt__(self, other):
             """Lexicographic comparator"""
             for mine, theirs in zip(self.point, other.point):
@@ -93,15 +91,12 @@ class DelaunayTriangulation:
         """The best faces you've ever seen"""
 
         def __init__(self, vertices, initial_half_facets=None):
-            # super().__init__(vertices)
-            # self.vertices = sorted(vertices)
             self.vertices = frozenset(vertices)
             self.half_facets = initial_half_facets or {}
             for vertex in self.vertices:
                 if vertex in self.half_facets:
                     # Make sure all the halffacets have self as a face
-                    self.half_facets[vertex].change_face(
-                        vertex, self)
+                    self.half_facets[vertex].change_face(vertex, self)
                 else:
                     self.half_facets[vertex] = DelaunayTriangulation.HalfFacet(
                         vertex,
@@ -159,7 +154,6 @@ class DelaunayTriangulation:
 
         def lineside(self, point):
             """Return 1, 0, or -1 respectively if the given point is:
-
             On the same side as self.opposite
             Co(hyper)planer with this facet
             On the other side of this facet
@@ -267,8 +261,6 @@ class DelaunayTriangulation:
                     link_us[1].twin = link_us[0]
         # [face for face in new_faces if face not in self.faces])
         self.faces.update(new_faces)
-        print('is it so bad? {}, {}'.format(len(self.faces), self.name))
-        # finished
 
     def _face_shatter(self, face):
         """Remove a face from self.faces and return all of its HalfFacets.
@@ -277,15 +269,6 @@ class DelaunayTriangulation:
         """
         self.faces.remove(face)  # constant time set operation win!
         return face.iter_facets()
-        # try:
-        #     print('here goes {}'.format(self.faces))
-        #     print(str(face))
-        #     self.faces.remove(face)  # ew, linear time.
-        #     print('there went {}'.format(self.faces))
-        #     return [*face.half_facets.values()]
-        # except ValueError:
-        #     print(self.faces)
-        #     raise
 
     def _facet_pop(self, facet, fsopuwmcd=None):
         """Push a pin through the facet and out into the twin face, shattering
@@ -301,7 +284,7 @@ class DelaunayTriangulation:
                 facet.twin]
 
     def locate(self, point):
-        """Point location with visibility walk. Straight from my homework."""
+        """Point location with visibility walk"""
         not_done = True
         current_face = self._arbitrary_face()
         while not_done:
@@ -311,7 +294,6 @@ class DelaunayTriangulation:
                     current_face = halffacet.twin.face
                     not_done = True
                     break
-        print("Found {} in {}".format(point, current_face.points()))
         return current_face
 
     def test_is_delaunay(self):
