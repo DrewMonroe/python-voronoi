@@ -3,7 +3,6 @@ import pyVor.utils
 import pyVor.structures
 
 import graphics as g
-import math
 
 
 def main():
@@ -24,9 +23,6 @@ def main():
         p = g.Circle(click, 2)
         p.setFill("black")
         p.draw(win)  # draw that click
-
-    # Exit on the next mouse click
-    win.getMouse()
 
 if __name__ == "__main__":
     main()
