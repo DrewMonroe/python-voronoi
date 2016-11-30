@@ -154,14 +154,15 @@ class DelaunayTriangulationTestCase(unittest.TestCase):
             frozenset(face)
             for face in del_tri.face_point_sets(homogeneous=False)])
         fn = os.path.join(os.path.dirname(__file__), 'data/dt.csv')
-        f = open(fn)
-        triangles = list(csv.reader(f))
-        triangles = [[int(y) for y in x] for x in triangles]
-        expected_face_sets = set(
-            [frozenset([point_array[y - 1] for y in x]) for x in triangles])
-        for face_set in face_sets:
-            self.assertEqual(len(face_set), 4)
-        self.assertEqual(face_sets, expected_face_sets)
+        with open(fn, 'r') as f:
+            triangles = list(csv.reader(f))
+            triangles = [[int(y) for y in x] for x in triangles]
+            expected_face_sets = set(
+                [frozenset([point_array[y - 1] for y in x])
+                    for x in triangles])
+            for face_set in face_sets:
+                self.assertEqual(len(face_set), 4)
+            self.assertEqual(face_sets, expected_face_sets)
 
         #     def test_flip(self):
 #         thingy = Triangulation(
