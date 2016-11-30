@@ -30,22 +30,24 @@ class Triangulation_GUI(Frame):
         time.sleep(.5)
 
     def click(self, event):
-        if self.working is False:
-            self.working = True
-            self.canvas.delete("circle")
-            self.addPoint(pyVor.primitives.Point(event.x, event.y))
-            if self.d:
-                self.d.delaunay_add(pyVor.primitives.Point(event.x, event.y),
-                                    homogeneous=False)
-            else:
-                self.d = pyVor.structures.DelaunayTriangulation(
-                    (pyVor.primitives.Point(event.x, event.y),),
-                    randomize=False,
-                    homogeneous=False,
-                    function=self.draw_point_locate)
-            self.canvas.delete("locate")
-            self.drawTriangulation()
-            self.working = False
+        if self.working:
+            return
+
+        self.working = True
+        self.canvas.delete("circle")
+        self.addPoint(pyVor.primitives.Point(event.x, event.y))
+        if self.d:
+            self.d.delaunay_add(pyVor.primitives.Point(event.x, event.y),
+                                homogeneous=False)
+        else:
+            self.d = pyVor.structures.DelaunayTriangulation(
+                (pyVor.primitives.Point(event.x, event.y),),
+                randomize=False,
+                homogeneous=False,
+                function=self.draw_point_locate)
+        self.canvas.delete("locate")
+        self.drawTriangulation()
+        self.working = False
 
     def showCircle(self, event):
         face = self.d.locate(pyVor.primitives.Point(event.x, event.y, 1))
