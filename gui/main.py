@@ -43,7 +43,6 @@ class Triangulation_GUI(Frame):
         for face in faces:
             face_points = []
             for point in face:
-                print(point)
                 face_points.append(point[0])
                 face_points.append(point[1])
             self.canvas.create_polygon(*face_points, fill="", outline="black",
