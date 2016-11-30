@@ -1,7 +1,7 @@
 import pyVor.primitives
 import pyVor.utils
 import pyVor.structures
-
+import time
 from tkinter import Tk, Canvas, Frame, BOTH
 
 
@@ -13,7 +13,20 @@ class Triangulation_GUI(Frame):
         self.initUI()
         self.d = None
 
+    def draw_point_locate(self, face):
+        print(face)
+        self.canvas.delete("locate")
+        face_points = []
+        for vert in face.vertices:
+            face_points.append(vert.point[0])
+            face_points.append(vert.point[1])
+        self.canvas.create_polygon(*face_points, fill="gray",
+                                   outline="black", tag="locate")
+        self.canvas.update()
+        time.sleep(.5)
+
     def click(self, event):
+        self.addPoint(pyVor.primitives.Point(event.x, event.y))
         if self.d:
             self.d.delaunay_add(pyVor.primitives.Point(event.x, event.y),
                                 homogeneous=False)
@@ -21,8 +34,9 @@ class Triangulation_GUI(Frame):
             self.d = pyVor.structures.DelaunayTriangulation(
                 (pyVor.primitives.Point(event.x, event.y),),
                 randomize=False,
-                homogeneous=False)
-        self.addPoint(pyVor.primitives.Point(event.x, event.y))
+                homogeneous=False,
+                function=self.draw_point_locate)
+        self.canvas.delete("locate")
         self.drawTriangulation()
         print("clicked at", event.x, event.y)
 
@@ -31,6 +45,7 @@ class Triangulation_GUI(Frame):
         self.pack(fill=BOTH, expand=1)
         self.canvas = Canvas(self)
         self.canvas.bind("<Button-1>", self.click)
+
         self.canvas.pack(fill=BOTH, expand=1)
 
     def addPoint(self, point):

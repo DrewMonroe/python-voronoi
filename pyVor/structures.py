@@ -191,7 +191,7 @@ class DelaunayTriangulation:
                 str(key) + str(value) for key, value in self.__dict__.items()
                 if not isinstance(value, type(self))])
 
-    def __init__(self, points, randomize=True, homogeneous=True, name='anon'):
+    def __init__(self, points, randomize=True, homogeneous=True, name='anon', function=None):
         """Construct the delaunay triangulation of the point list"""
         if not homogeneous:
             points = [pt.lift(lambda x: 1) for pt in points]
@@ -202,6 +202,7 @@ class DelaunayTriangulation:
         self.faces = set([self.Face(outer_face)])
         self.vertices = set(outer_face)
         self.name = name  # for debugging. unittest is too parallel for me
+        self.function = function
         if randomize:
             shuffle(points)  # randomize this thing (in place)
         self.point_history = []  # per request of gui folks
@@ -288,6 +289,8 @@ class DelaunayTriangulation:
         not_done = True
         current_face = self._arbitrary_face()
         while not_done:
+            if self.function:
+                self.function(current_face)
             not_done = False
             for halffacet in current_face.iter_facets():
                 if halffacet.lineside(point) == -1:
