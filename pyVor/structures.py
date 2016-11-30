@@ -214,6 +214,9 @@ class DelaunayTriangulation:
         # print('\n{}'.format(len(self.faces)))
         if homogeneous is False:
             point = point.lift(lambda x: 1)
+        for p in self.point_history:
+            if p == point:
+                return
         self.point_history.append(point)
         # dead_face = self.locate(point)
         hf_stack = set(self._face_shatter(self.locate(point)))
