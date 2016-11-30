@@ -30,6 +30,7 @@ class Triangulation_GUI(Frame):
         time.sleep(.5)
 
     def click(self, event):
+        self.canvas.delete("circle")
         self.addPoint(pyVor.primitives.Point(event.x, event.y))
         if self.d:
             self.d.delaunay_add(pyVor.primitives.Point(event.x, event.y),
@@ -42,14 +43,36 @@ class Triangulation_GUI(Frame):
                 function=self.draw_point_locate)
         self.canvas.delete("locate")
         self.drawTriangulation()
-        print("clicked at", event.x, event.y)
+
+    def showCircle(self, event):
+        face = self.d.locate(pyVor.primitives.Point(event.x, event.y, 1))
+        center = pyVor.utils.circumcenter(
+            *[vert.point for vert in face.vertices])
+        face_point = next(iter(face.vertices)).point
+        distance = ((face_point[0] - center[0]) ** 2 +
+                    (face_point[1] - center[1]) ** 2) ** .5
+        self.canvas.create_oval(center[0] - distance, center[1] - distance,
+                                center[0] + distance, center[1] + distance,
+                                outline="black", dash=(5,), tag="circle")
+
+    def clear(self, event):
+        self.canvas.delete("circle")
+
+    def modify_function(self, event):
+        if self.d.function is None:
+            self.d.set_function(self.draw_point_locate)
+        else:
+            self.d.set_function(None)
 
     def initUI(self):
         self.parent.title("Delaunay Triangulation")
         self.pack(fill=BOTH, expand=1)
         self.canvas = Canvas(self)
         self.canvas.bind("<Button-1>", self.click)
-
+        self.canvas.bind("<Button-3>", self.showCircle)
+        self.canvas.bind("c", self.clear)
+        self.canvas.bind("s", self.modify_function)
+        self.canvas.focus_set()
         self.canvas.pack(fill=BOTH, expand=1)
 
     def addPoint(self, point):

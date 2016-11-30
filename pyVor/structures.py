@@ -344,6 +344,9 @@ class DelaunayTriangulation:
         """Get an arbitrary face of the triangulation"""
         return next(iter(self.faces))  # Hideous
 
+    def set_function(self, funct):
+        self.function = funct
+
 # _face_shatter delete face and return all facets of it. (As inner
 # HalfFacets)
 
