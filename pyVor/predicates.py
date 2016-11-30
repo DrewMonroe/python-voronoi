@@ -52,10 +52,9 @@ def incircle(*points, homogeneous=True):
     tmp = []
     for v in vectors:
         if v[-1] == 0:
-            v *= 100000
+            v *= 1000000000
             v += Vector(*([0] * (len(v) - 1)), 1)
         tmp.append(v)
-
     vectors = tmp
 
     vectors = [vector.lift(lambda v: v[:-1].norm_squared())
