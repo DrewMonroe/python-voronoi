@@ -15,3 +15,10 @@ To run a particular test, run `python -m unittest -v pyVor.tests.testPredicates`
 
 ### Running Arbitrary Files
 `python -m pyVor.path.to.file`
+
+### GUI
+Key bindings are as follows:
+- `left click` adds a point
+- `right click` on a triangle shows the circumcircle
+- `c` clear all circumcircles
+- `s` toggle visualization
