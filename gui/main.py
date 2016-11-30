@@ -15,10 +15,15 @@ class Triangulation_GUI(Frame):
 
     def draw_point_locate(self, face):
         self.canvas.delete("locate")
+        print(frozenset([vert.point for vert in face.vertices]))
         face_points = []
         for vert in face.vertices:
-            face_points.append(vert.point[0])
-            face_points.append(vert.point[1])
+            if vert.point[2] == 0:
+                face_points.append(vert.point[0] * 1000000000)
+                face_points.append(vert.point[1] * 1000000000)
+            else:
+                face_points.append(vert.point[0])
+                face_points.append(vert.point[1])
         self.canvas.create_polygon(*face_points, fill="gray",
                                    outline="black", tag="locate")
         self.canvas.update()
