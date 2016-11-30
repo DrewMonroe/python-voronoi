@@ -5,7 +5,7 @@ Some of these are relics from an older design.
 
 import unittest
 
-from pyVor.primitives import Point
+from pyVor.primitives import Point, Vector
 from pyVor.predicates import incircle, ccw
 
 

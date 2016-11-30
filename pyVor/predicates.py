@@ -2,7 +2,7 @@
 
 """This is a collection of linear predicate implementations."""
 
-from pyVor.primitives import Matrix, Point
+from pyVor.primitives import Matrix, Point, Vector
 
 
 def ccw(*points, homogeneous=True):
@@ -48,6 +48,14 @@ def incircle(*points, homogeneous=True):
     else:
         # We'll give each point a homogeneous coordinate of 1
         vectors = [(pt.to_vector()).lift() for pt in points]
+
+    tmp = []
+    for v in vectors:
+        if v[-1] == 0:
+            v *= 1000000000
+            v += Vector(*([0] * (len(v) - 1)), 1)
+        tmp.append(v)
+    vectors = tmp
 
     vectors = [vector.lift(lambda v: v[:-1].norm_squared())
                for vector in vectors]

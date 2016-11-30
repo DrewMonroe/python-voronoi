@@ -191,7 +191,7 @@ class DelaunayTriangulation:
                 str(key) + str(value) for key, value in self.__dict__.items()
                 if not isinstance(value, type(self))])
 
-    def __init__(self, points, randomize=True, homogeneous=True, name='anon'):
+    def __init__(self, points, randomize=True, homogeneous=True, name='anon', function=None):
         """Construct the delaunay triangulation of the point list"""
         if not homogeneous:
             points = [pt.lift(lambda x: 1) for pt in points]
@@ -202,15 +202,21 @@ class DelaunayTriangulation:
         self.faces = set([self.Face(outer_face)])
         self.vertices = set(outer_face)
         self.name = name  # for debugging. unittest is too parallel for me
+        self.function = function
         if randomize:
             shuffle(points)  # randomize this thing (in place)
         self.point_history = []  # per request of gui folks
         for point in points:
             self.delaunay_add(point)
 
-    def delaunay_add(self, point):
+    def delaunay_add(self, point, homogeneous=True):
         """Add a point and then recover the delaunay property"""
         # print('\n{}'.format(len(self.faces)))
+        if homogeneous is False:
+            point = point.lift(lambda x: 1)
+        for p in self.point_history:
+            if p == point:
+                return
         self.point_history.append(point)
         # dead_face = self.locate(point)
         hf_stack = set(self._face_shatter(self.locate(point)))
@@ -286,6 +292,8 @@ class DelaunayTriangulation:
         not_done = True
         current_face = self._arbitrary_face()
         while not_done:
+            if self.function:
+                self.function(current_face)
             not_done = False
             for halffacet in current_face.iter_facets():
                 if halffacet.lineside(point) == -1:
@@ -328,8 +336,6 @@ class DelaunayTriangulation:
                 result.add(frozenset([
                     point[slice(None) if homogeneous else slice(-1)]
                     for point in subresult]))
-            else:
-                print("It works a little")
         return result
 
     def dimension(self):
@@ -340,6 +346,9 @@ class DelaunayTriangulation:
     def _arbitrary_face(self):
         """Get an arbitrary face of the triangulation"""
         return next(iter(self.faces))  # Hideous
+
+    def set_function(self, funct):
+        self.function = funct
 
 # _face_shatter delete face and return all facets of it. (As inner
 # HalfFacets)
