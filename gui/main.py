@@ -30,7 +30,7 @@ class Triangulation_GUI(Frame):
         time.sleep(.5)
 
     def click(self, event):
-        if self.working == False:
+        if self.working is False:
             self.working = True
             self.canvas.delete("circle")
             self.addPoint(pyVor.primitives.Point(event.x, event.y))
