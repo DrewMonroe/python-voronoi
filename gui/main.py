@@ -14,7 +14,6 @@ class Triangulation_GUI(Frame):
         self.d = None
 
     def draw_point_locate(self, face):
-        print(face)
         self.canvas.delete("locate")
         face_points = []
         for vert in face.vertices:
