@@ -1,13 +1,8 @@
 #!/usr/bin/env python3
 
-"""This is a collection of linear predicate implementations.
+"""This is a collection of linear predicate implementations."""
 
-It also has basic stuff like 'lift' and 'norm', and also a thing
-to make vectors / document how we should make vectors.
-"""
-
-# from scipy import linalg # supposedly faster, but doesn't have everything
-from pyVor.primitives import Matrix, Vector, Point
+from pyVor.primitives import Matrix, Point, Vector
 
 
 def ccw(*points, homogeneous=True):
@@ -23,29 +18,44 @@ def ccw(*points, homogeneous=True):
     if not homogeneous:
         mtrx = Matrix(*[pt.lift(lambda v: 1).to_vector() for pt in points])
     else:
-        mtrx = Matrix(*[pt.to_vector() for pt in points])
-    return mtrx.sign_det()
+        mtrx = None
+        for pt in points:
+            if pt[-1] == 1:
+                # We need at list one non-infinite point
+                # for this to work normally
+                mtrx = Matrix(*[pt.to_vector() for pt in points])
+                break
+    if mtrx is not None:
+        return mtrx.sign_det()
+    # If all points have 0 for extended homogeneous coordinate,
+    # win by using the ccw test for one dimension higher:
+    return ccw(*points,
+               Point(*(0 for i in range(len(points[0]) - 1)), -1),
+               homogeneous=False)
 
 
 def incircle(*points, homogeneous=True):
-    """In R^2, is the last argument inside the circle defined by the
-    previous arguments?
-    1 if inside, -1 if outside, and 0 if all cocircular.
+    """Returns 1 if the last point is inside the circle defined by the other
+    three, -1 if outside, and 0 if all cocircular.
 
     The points are interpreted as having extended homogenious
     coordinates unless homogeneous=False is passed.
     """
-    # if debug and homogeneous:
-    #     # Checking for human error. Eventually we can turn debug off.
-    #     if not sum([p[-1] == 1 or p[-1] == 0 for p in points]):
-    #         raise ValueError("These points are not homogeneous!")
 
     if homogeneous:
         # The points already have homogeneous coordinates
-        vectors = [pt - Point(*([0] * len(pt))) for pt in points]
+        vectors = [pt.to_vector() for pt in points]
     else:
         # We'll give each point a homogeneous coordinate of 1
-        vectors = [(pt - Point(*([0] * len(pt)))).lift() for pt in points]
+        vectors = [(pt.to_vector()).lift() for pt in points]
+
+    tmp = []
+    for v in vectors:
+        if v[-1] == 0:
+            v *= 1000000000
+            v += Vector(*([0] * (len(v) - 1)), 1)
+        tmp.append(v)
+    vectors = tmp
 
     vectors = [vector.lift(lambda v: v[:-1].norm_squared())
                for vector in vectors]

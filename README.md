@@ -10,5 +10,15 @@ To run all the tests, run `python -m unittest discover -v`.
 To run a particular test, run `python -m unittest -v pyVor.tests.testPredicates`
 (optionally replacing `testPredicates` with the test you actually want to run).
 
+### Requirements
+- tk (needs to be installed via package manager. For example `pacman -S tk`)
+
 ### Running Arbitrary Files
 `python -m pyVor.path.to.file`
+
+### GUI
+Key bindings are as follows:
+- `left click` adds a point
+- `right click` on a triangle shows the circumcircle
+- `c` clear all circumcircles
+- `s` toggle visualization
