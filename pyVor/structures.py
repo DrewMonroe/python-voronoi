@@ -8,6 +8,7 @@ from random import shuffle
 import time
 from pyVor.primitives import Point
 from pyVor.predicates import ccw, incircle
+from pyVor.utils import circumcenter
 
 
 def outer_face_pts(dimension):
@@ -414,3 +415,26 @@ class DelaunayTriangulation:
 #     (Need to deal with linking the faces of the star together)
 
 # half_facets solve the problem of storing an outer face. Nice.
+
+
+class Voronoi:
+    """A data structure primarily used for drawing the Voronoi diagram"""
+    def __init__(self, triangulation):
+        self.points = set()
+        self.edges = set()
+        finite_faces = (f for f in triangulation.faces if self._is_finite(f))
+        for face in finite_faces:
+            point = circumcenter(*face.points())
+            self.points.add(point)
+            for half_facet in face.iter_facets():
+                if half_facet.twin:
+                    adj_point = circumcenter(*half_facet.twin.face.points())
+                    if not self._is_finite(half_facet.twin.face):
+                        tmp_vec = (adj_point.to_vector()[:-1])*(1/1000000000)
+                        adj_point = Point(*tmp_vec.to_array())
+                        adj_point = adj_point.lift(lambda *args: 0)
+                    self.edges.add(frozenset([point, adj_point]))
+
+    def _is_finite(self, face):
+        # checks if the face is only made of finite points
+        return [p[-1] for p in face.points()] == [1]*len(face.points())

@@ -7,8 +7,8 @@ import unittest
 import csv
 import os
 from pyVor.primitives import Point
-
 from pyVor.structures import DelaunayTriangulation as DelT
+from pyVor.structures import Voronoi
 
 
 class DelaunayTriangulationTestCase(unittest.TestCase):
@@ -162,13 +162,29 @@ class DelaunayTriangulationTestCase(unittest.TestCase):
                     for x in triangles])
             for face_set in face_sets:
                 self.assertEqual(len(face_set), 4)
-            self.assertEqual(face_sets, expected_face_sets)
+        self.assertEqual(face_sets, expected_face_sets)
 
         #     def test_flip(self):
 #         thingy = Triangulation(
 #             points=[Point(0, 0, 1), Point(1, 0, 1), Point(0, 1, 1)])
 # #         We do not flip! Nevermind!
 
+
+class VoronoiTestCase(unittest.TestCase):
+    """Tests for the voronoi data structure."""
+    def test_2d_case(self):
+        """Test the output for a super simple 2D case"""
+
+        del_tri = DelT([Point(3, 4), Point(-3, 4),
+                        Point(0, -5)],
+                       homogeneous=False,
+                       randomize=False)
+        vor = Voronoi(del_tri)
+        expected_center = Point(0.0, 0.0, 1.0)
+
+        self.assertTrue(expected_center in vor.points)
+        self.assertTrue(len(vor.points) == 1)
+        self.assertTrue(len(vor.edges) == 3)
 
 if __name__ == '__main__':
     unittest.main()
