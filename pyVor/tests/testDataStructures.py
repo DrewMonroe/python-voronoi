@@ -7,7 +7,7 @@ import unittest
 import csv
 import os
 from pyVor.primitives import Point
-from pyVor.primitives import Vector
+
 from pyVor.structures import DelaunayTriangulation as DelT
 
 
