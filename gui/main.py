@@ -13,8 +13,10 @@ class Triangulation_GUI(Frame):
         Frame.__init__(self, parent)
         self.parent = parent
         self.initUI()
+        self.points = []
         self.d = None
         self.working = False
+        self.edge_dic = {}
 
     def draw_point_locate(self, face):
         """Show the point location for a given face"""
@@ -30,7 +32,7 @@ class Triangulation_GUI(Frame):
         # Make the polygon
         self.canvas.create_polygon(*face_points, fill="gray",
                                    outline="black", tag="locate")
-        self.canvas.update()
+        self.canvas.update_idletasks()
         # Sleep so that the user can actually see what's happening
         time.sleep(.5)
         self.canvas.delete("locate")  # Delete the highlighted triangle
@@ -45,7 +47,9 @@ class Triangulation_GUI(Frame):
 
         self.working = True
         self.canvas.delete("circle")  # the circumcircle may not be valid
-        self.addPoint(pyVor.primitives.Point(event.x, event.y))
+        point = pyVor.primitives.Point(event.x, event.y)
+        self.points.append(point)
+        self.addPoint(point)
         # if the triangulation exists, add the point to the triangulation,
         # otherwise, make a new triangulation
         if self.d:
@@ -60,7 +64,8 @@ class Triangulation_GUI(Frame):
                 location_visualizer=self.draw_point_locate,
                 drawTriangulation=self.drawTriangulation,
                 highlight_edge=self.highlight_edge,
-                gui=True)
+                gui=True,
+                delete_edge=self.delete_edge)
         self.canvas.delete("locate")
         self.drawTriangulation(self.d)
         self.working = False
@@ -83,14 +88,16 @@ class Triangulation_GUI(Frame):
         self.canvas.create_oval(center[0] - distance, center[1] - distance,
                                 center[0] + distance, center[1] + distance,
                                 outline=color, dash=(5,), tag="circle")
-        self.canvas.update()
+        self.canvas.update_idletasks()
 
     def highlight_edge(self, facet, color="black", tag="edge"):
         points = []
         for point in facet.points():
             points.append(point[0])
             points.append(point[1])
-        self.canvas.create_line(*points, fill=color, tag=tag)
+        line = self.canvas.create_line(*points, fill=color, tag=tag)
+        if color == "black":
+            self.edge_dic[facet] = line
         self.canvas.update()
 
     def clear(self, event):
@@ -116,29 +123,37 @@ class Triangulation_GUI(Frame):
         self.canvas.focus_set()
         self.canvas.pack(fill=BOTH, expand=1)
 
+    def delete_edge(self, facet):
+        self.canvas.delete(self.edge_dic[facet])
+        self.canvas.update_idletasks()
+
     def addPoint(self, point):
         """Add a point to the screen"""
         self.canvas.create_oval(point[0] - 5, point[1] - 5, point[0] + 5,
                                 point[1] + 5, outline="black", fill="black")
 
-    def drawTriangulation(self, triangulation):
+    def drawTriangulation(self, triangulation, clear=False):
         """Actually draw the triangulation"""
         self.canvas.delete("triangle")
         self.canvas.delete("circle")
         self.canvas.delete("highlight_edge")
-        # faces = self.d.face_point_sets(homogeneous=False)
-        # for face in faces:
-        #    face_points = []
-        #    for point in face:
-        #        face_points.append(point[0])
-        #        face_points.append(point[1])
-        #    self.canvas.create_polygon(*face_points, fill="", outline="black",
-        #                               tag="triangle")
-        facets = triangulation.get_facets()
-        for facet in facets:
-            if not self.is_infinite(facet):
-                self.highlight_edge(facet, tag="triangle")
-        self.canvas.update()
+        if clear:
+            self.canvas.delete("all")
+            for point in self.points:
+                self.addPoint(point)
+        faces = triangulation.face_point_sets(homogeneous=False)
+        for face in faces:
+            face_points = []
+            for point in face:
+                face_points.append(point[0])
+                face_points.append(point[1])
+            self.canvas.create_polygon(*face_points, fill="", outline="black",
+                                       tag="triangle")
+        # facets = triangulation.get_facets()
+        # for facet in facets:
+        # if not self.is_infinite(facet):
+        #        self.highlight_edge(facet, tag="triangle")
+        self.canvas.update_idletasks()
 
     def is_infinite(self, facet):
         points = facet.points()

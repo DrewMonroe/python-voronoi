@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+# !/usr/bin/env python3
 
 """Data structures. Enough said."""
 
@@ -148,6 +148,13 @@ class DelaunayTriangulation:
         def __eq__(self, other):
             return self.vertices() == other.vertices()
 
+        def is_infinite(self):
+            points = self.points()
+            for point in points:
+                if point[-1] == 0:
+                    return True
+            return False
+
         def vertices(self):
             """get the vertices, which may be stored implicitly"""
             return self._vertices
@@ -200,7 +207,8 @@ class DelaunayTriangulation:
     def __init__(self, points, randomize=True, homogeneous=True, name='anon',
                  location_visualizer=None, drawCircle=None,
                  drawTriangulation=None,
-                 highlight_edge=None, gui=False, visualization=False):
+                 highlight_edge=None, gui=False, visualization=False,
+                 delete_edge=None):
         """Construct the delaunay triangulation of the point list"""
         if not homogeneous:
             points = [pt.lift(lambda x: 1) for pt in points]
@@ -211,24 +219,18 @@ class DelaunayTriangulation:
         self.faces = set([self.Face(outer_face)])
         self.vertices = set(outer_face)
         self.facets = set()
-        self.gui = gui
-        if self.gui:
-            self.update_facets()
         self.name = name  # for debugging. unittest is too parallel for me
         self.location_visualizer = location_visualizer
         self.drawCircle = drawCircle
         self.drawTriangulation = drawTriangulation
         self.highlight_edge = highlight_edge
         self.visualization = visualization
+        self.delete_edge = delete_edge
         if randomize:
             shuffle(points)  # randomize this thing (in place)
         self.point_history = []  # per request of gui folks
         for point in points:
             self.delaunay_add(point)
-
-    def update_facets(self):
-        for face in self.faces:
-            self.facets.update(face.iter_facets())
 
     def delaunay_add(self, point, homogeneous=True):
         """Add a point and then recover the delaunay property"""
@@ -241,45 +243,50 @@ class DelaunayTriangulation:
         self.point_history.append(point)
         # dead_face = self.locate(point)
         hf_stack = set(self._face_shatter(self.locate(point)))
+        if self.visualization:
+            for facet in hf_stack:
+                if not facet.is_infinite():
+                    self.highlight_edge(facet, tag=str(hash(facet)))
         # already_processed = set()
         new_vert = self.Vertex(point)
         self.vertices.add(new_vert)
         # (bisect_left(self.vertices, new_vert), new_vert)
         ld_halffacets = set()  # locally delaunay halffacets
         while hf_stack:
-            if self.visualization:
-                self.drawTriangulation(self)
-                time.sleep(1)
             free_facet = hf_stack.pop()
             # if free_facet in already_processed:
             #     print('useful')  # Never got printed.
             #     continue
             # else:
             #     already_processed.add(free_facet)
-            if self.visualization:
-                self.highlight_edge(free_facet, color="red",
-                                    tag="highlight_edge")
             if free_facet.locally_delaunay(new_vert):
                 ld_halffacets.add(free_facet)
-                if self.visualization and free_facet.twin:
+                if (self.visualization and free_facet.twin and not
+                    free_facet.is_infinite()):
+                    self.highlight_edge(free_facet, color="red",
+                                        tag="highlight_edge")
                     self.drawCircle(free_facet.twin.face)
                     time.sleep(1)
             else:
                 # Add them all to the queue/stack/stueue/quack
-                if self.gui:
-                    self.facets.remove(free_facet)
-                print([vert.point for vert in free_facet.vertices()])
                 if free_facet.twin.face not in self.faces:
                     continue
-                if self.visualization and free_facet.twin:
+                facets = self._facet_pop(free_facet, free_facet.twin.face)
+                hf_stack.update(facets)
+                if (self.visualization and free_facet.twin and not
+                    free_facet.is_infinite()):
+                    for facet in facets:
+                        self.highlight_edge(facet)
+                    self.drawTriangulation(self)
+                    self.highlight_edge(free_facet, color="red",
+                                        tag="highlight_edge")
                     self.drawCircle(free_facet.twin.face, color="red",
                                     delete=True)
                     time.sleep(1)
-                hf_stack.update(self._facet_pop(
-                    free_facet, free_facet.twin.face))
-        if self.visualization:
-            self.drawTriangulation(self)
-            time.sleep(1)
+                    self.delete_edge(free_facet)
+            if self.visualization:
+                self.drawTriangulation(self)
+                time.sleep(.5)
         new_faces = []
         for halffacet in ld_halffacets:
             # I have to link up all these edges now
@@ -304,9 +311,9 @@ class DelaunayTriangulation:
                     link_us[0].twin = link_us[1]
                     link_us[1].twin = link_us[0]
         # [face for face in new_faces if face not in self.faces])
+        if self.visualization:
+            self.drawTriangulation(self, clear=True)
         self.faces.update(new_faces)
-        if self.gui:
-            self.update_facets()
 
     def _face_shatter(self, face):
         """Remove a face from self.faces and return all of its HalfFacets.
