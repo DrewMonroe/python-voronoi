@@ -17,6 +17,7 @@ class Triangulation_GUI(Frame):
         self.d = None
         self.working = False
         self.edge_dic = {}
+        self.voronoi_on = False
 
     def draw_point_locate(self, face):
         """Show the point location for a given face"""
@@ -50,6 +51,8 @@ class Triangulation_GUI(Frame):
         point = pyVor.primitives.Point(event.x, event.y)
         self.points.append(point)
         self.addPoint(point)
+        self.clear_vononoi()  # the voronoi diagram may not be valid anymore
+        self.addPoint(pyVor.primitives.Point(event.x, event.y))
         # if the triangulation exists, add the point to the triangulation,
         # otherwise, make a new triangulation
         if self.d:
@@ -68,6 +71,8 @@ class Triangulation_GUI(Frame):
                 delete_edge=self.delete_edge)
         self.canvas.delete("locate")
         self.drawTriangulation(self.d)
+        if self.voronoi_on:
+            self.draw_voronoi()
         self.working = False
 
     def showCircle(self, event):
@@ -111,6 +116,31 @@ class Triangulation_GUI(Frame):
         else:
             self.d.set_visualize(True)
 
+    def toggle_voronoi(self, event):
+        """Switches the voronoi diagram on or off"""
+        self.voronoi_on = False if self.voronoi_on == True else True
+        if self.voronoi_on:
+            self.draw_voronoi()
+            self.canvas.update()
+        else:
+            self.clear_vononoi()
+
+    def clear_vononoi(self):
+        """Delete the voronoi diagram from the screen"""
+        self.canvas.delete("voronoipoint")
+        self.canvas.delete("voronoiedge")
+
+    def draw_voronoi(self):
+        """Draws the voronoi diagram"""
+        self.voronoi = pyVor.structures.Voronoi(self.d)
+        for point in self.voronoi.points:
+            self.addPoint(point, color="red", tag="voronoipoint")
+
+        for edge in self.voronoi.edges:
+            point1, point2 = edge
+            self.canvas.create_line(*point1, *point2,
+                                    fill="red", tag="voronoipoint")
+
     def initUI(self):
         """Initialize the window"""
         self.parent.title("Delaunay Triangulation")
@@ -119,6 +149,7 @@ class Triangulation_GUI(Frame):
         self.canvas.bind("<Button-1>", self.click)
         self.canvas.bind("c", self.showCircle)
         self.canvas.bind("<BackSpace>", self.clear)
+        self.canvas.bind("<v>", self.toggle_voronoi)
         self.canvas.bind("s", self.toggle_visualization)
         self.canvas.focus_set()
         self.canvas.pack(fill=BOTH, expand=1)
@@ -127,10 +158,13 @@ class Triangulation_GUI(Frame):
         self.canvas.delete(self.edge_dic[facet])
         self.canvas.update_idletasks()
 
-    def addPoint(self, point):
+    def addPoint(self, point, color="black", tag=""):
         """Add a point to the screen"""
         self.canvas.create_oval(point[0] - 5, point[1] - 5, point[0] + 5,
-                                point[1] + 5, outline="black", fill="black")
+                                point[1] + 5,
+                                outline=color,
+                                fill=color,
+                                tag=tag)
 
     def drawTriangulation(self, triangulation, clear=False):
         """Actually draw the triangulation"""
