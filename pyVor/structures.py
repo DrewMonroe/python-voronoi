@@ -7,7 +7,6 @@ from random import shuffle
 # "O(n log(n)) for PPT adversaries" is not an important feature
 from pyVor.primitives import Point
 from pyVor.predicates import ccw, incircle
-from pyVor.utils import circumcenter
 
 
 def outer_face_pts(dimension):
@@ -247,7 +246,7 @@ class DelaunayTriangulation:
         if self.gui and self.gui.visualization:
             for facet in hf_stack:
                 if not facet.is_infinite():
-                    self.gui.highlight_edge(facet, tag=str(hash(facet)))
+                    self.gui.highlight_edge(facet)
         # already_processed = set()
         new_vert = self.Vertex(point)
         self.vertices.add(new_vert)
@@ -268,7 +267,7 @@ class DelaunayTriangulation:
                 if (self.gui and self.gui.visualization and
                         free_facet.twin and not free_facet.is_infinite()):
                     self.gui.highlight_edge(free_facet, color="red",
-                                            tag="highlight_edge")
+                                            tag="highlight_edge", add=False)
                     self.gui.draw_circle(free_facet.twin.face, sleep=True)
             else:
                 # Add them all to the queue/stack/stueue/quack
@@ -276,14 +275,19 @@ class DelaunayTriangulation:
                     continue
                 facets = self._facet_pop(free_facet, free_facet.twin.face)
                 hf_stack.update(facets)
+
                 # More gui things
+                if self.gui.visualization:
+                    for facet in facets:
+                        if not facet.is_infinite():
+                            self.gui.highlight_edge(facet)
                 if (self.gui and self.gui.visualization and free_facet.twin and
                         not free_facet.is_infinite()):
                     for facet in facets:
                         self.gui.highlight_edge(facet)
                     self.gui.draw_triangulation(self)
                     self.gui.highlight_edge(free_facet, color="red",
-                                            tag="highlight_edge")
+                                            tag="highlight_edge", add=False)
                     self.gui.draw_circle(free_facet.twin.face, color="red",
                                          delete=True, sleep=True)
                     self.gui.delete_edge(free_facet)
@@ -440,3 +444,4 @@ class Voronoi:
     def _is_finite(self, face):
         """Checks if the face is only made of finite points"""
         return [p[-1] for p in face.points()] == [1]*len(face.points())
+
