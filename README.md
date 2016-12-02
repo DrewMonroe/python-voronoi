@@ -28,3 +28,4 @@ Key bindings are as follows:
 - `<backspace>` to clear all circumcircles
 - `s` to toggle visualization
 - `v` to toggle showing the Voronoi diagram
+- `p` to print the points added to standard out
