@@ -22,7 +22,6 @@ def circumcenter(*points, homogeneous=True):
             tmp = []
             for v in [p.to_vector() for p in points]:
                 if v[-1] == 0:
-                    # print(v)
                     v *= 1000000000
                 tmp.append(v)
             # Just strip off the homogeneous coordinates.
