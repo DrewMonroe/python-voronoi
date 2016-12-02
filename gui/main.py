@@ -93,6 +93,7 @@ class Triangulation_GUI(Frame):
         self.canvas.bind("<Button-3>", self.showCircle)
         self.canvas.bind("c", self.clear)
         self.canvas.bind("s", self.modify_function)
+        self.canvas.bind("p", self.print_point_history)
         self.canvas.focus_set()
         self.canvas.pack(fill=BOTH, expand=1)
 
@@ -112,6 +113,10 @@ class Triangulation_GUI(Frame):
                 face_points.append(point[1])
             self.canvas.create_polygon(*face_points, fill="", outline="black",
                                        tag="triangle")
+
+    def print_point_history(self, event):
+        """Print to stdout the list of points added so far, in order"""
+        print(self.d.point_history.__repr__())
 
 
 def main():
