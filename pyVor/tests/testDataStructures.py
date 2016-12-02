@@ -7,7 +7,6 @@ import unittest
 import csv
 import os
 from pyVor.primitives import Point
-from pyVor.primitives import Vector
 from pyVor.structures import DelaunayTriangulation as DelT
 
 
@@ -159,15 +158,27 @@ class DelaunayTriangulationTestCase(unittest.TestCase):
             triangles = [[int(y) for y in x] for x in triangles]
             expected_face_sets = set(
                 [frozenset([point_array[y - 1] for y in x])
-                    for x in triangles])
+                 for x in triangles])
             for face_set in face_sets:
                 self.assertEqual(len(face_set), 4)
             self.assertEqual(face_sets, expected_face_sets)
 
-        #     def test_flip(self):
-#         thingy = Triangulation(
-#             points=[Point(0, 0, 1), Point(1, 0, 1), Point(0, 1, 1)])
-# #         We do not flip! Nevermind!
+    def test_convex_hull_bug(self):
+        """Eliminate bugs where the the convex hull becomes concave."""
+
+        # This case is prohibitively big to test properly
+        # points = [Point(*coords) for coords in [
+        #     (248, 508, 1), (709, 346, 1), (820, 535, 1), (427, 274, 1),
+        #     (671, 220, 1), (927, 342, 1), (612, 627, 1), (762, 633, 1),
+        #     (161, 238, 1), (71, 102, 1), (185, 25, 1), (233, 6, 1)]]
+        # del_tri = DelT(points, homogeneous=True, randomize=False)
+        # self.assertTrue(del_tri.test_is_delaunay())
+
+        # A nice clean 4 points that caused a bug.
+        points = [Point(*coords) for coords in [
+            (582, 245, 1), (649, 400, 1), (854, 279, 1), (411, 176, 1)]]
+        del_tri = DelT(points, homogeneous=True, randomize=False)
+        self.assertEqual(len(del_tri.face_point_sets()), 3)
 
 
 if __name__ == '__main__':
