@@ -19,10 +19,16 @@ def circumcenter(*points, homogeneous=True):
 
     if homogeneous:
         if [pt[-1] for pt in points] != [1] * len(points):
-            raise NotImplementedError(
-                "Circumcenter undefined for extended homogeneous coordinates")
-        else:
+            tmp = []
+            for v in [p.to_vector() for p in points]:
+                if v[-1] == 0:
+                    # print(v)
+                    v *= 1000000000
+                tmp.append(v)
             # Just strip off the homogeneous coordinates.
+            tmp = [v[:-1] for v in tmp]
+            points = [Point(*v.to_array()) for v in tmp]
+        else:
             points = [pt[:-1] for pt in points]
 
     vectors = [p - points[0] for p in points[1:]]
