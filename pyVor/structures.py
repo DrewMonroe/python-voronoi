@@ -277,7 +277,7 @@ class DelaunayTriangulation:
                 hf_stack.update(facets)
 
                 # More gui things
-                if self.gui.visualization:
+                if self.gui and self.gui.visualization:
                     for facet in facets:
                         if not facet.is_infinite():
                             self.gui.highlight_edge(facet)
