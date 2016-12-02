@@ -57,8 +57,6 @@ def incircle(*points, homogeneous=True):
         vectors = [(pt.to_vector()).lift() for pt in points]
 
     vectors = [vect.lift(lambda v: v[:-1].norm_squared()) for vect in vectors]
-    # vectors.append(Vector(*([0] * (len(vectors[0]) - 1)), 1))
-    # vectors = [vect.lift(lambda v: 1) for vect in vectors]  # crapshoot
 
     infinite_count = 0
     for vect in vectors:
