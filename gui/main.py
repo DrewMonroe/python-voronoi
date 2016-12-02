@@ -118,7 +118,7 @@ class Triangulation_GUI(Frame):
 
     def toggle_voronoi(self, event):
         """Switches the voronoi diagram on or off"""
-        self.voronoi_on = False if self.voronoi_on == True else True
+        self.voronoi_on = False if self.voronoi_on else True
         if self.voronoi_on:
             self.draw_voronoi()
             self.canvas.update()
@@ -138,6 +138,10 @@ class Triangulation_GUI(Frame):
 
         for edge in self.voronoi.edges:
             point1, point2 = edge
+            point1 = point1[:-1].to_vector() * 1000000 if point1[-1] == 0\
+                else point1[:-1].to_vector()
+            point2 = point2[:-1].to_vector() * 1000000 if point2[-1] == 0\
+                else point2[:-1].to_vector()
             self.canvas.create_line(*point1, *point2,
                                     fill="red", tag="voronoipoint")
 
