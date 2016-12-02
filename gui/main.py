@@ -204,6 +204,10 @@ class Triangulation_GUI(Frame):
         """Print to stdout the list of points added so far, in order"""
         print(self.d.point_history.__repr__())
 
+    def print_point_history(self, event):
+        """Print to stdout the list of points added so far, in order"""
+        print(self.d.point_history.__repr__())
+
 
 def main():
     root = Tk()
