@@ -40,6 +40,13 @@ def incircle(*points, homogeneous=True):
 
     The points are interpreted as having extended homogenious
     coordinates unless homogeneous=False is passed.
+
+    If multiple points are at infinity, incircle isn't necessarily
+    well-defined, so we had to make something up. Essentially we only consider
+    one point at a time to be at infinity, and we see if all the resulting
+    tests agree with each other. Mostly this means we return 0. In 2
+    dimensions, with two infinite points, this results in an X shaped partition
+    of the plane, where two faces are 0s, one is 1, and one is -1.
     """
 
     if homogeneous:
@@ -49,18 +56,29 @@ def incircle(*points, homogeneous=True):
         # We'll give each point a homogeneous coordinate of 1
         vectors = [(pt.to_vector()).lift() for pt in points]
 
-    tmp = []
-    for v in vectors:
-        if v[-1] == 0:
-            v *= 1000000000
-            v += Vector(*([0] * (len(v) - 1)), 1)
-        tmp.append(v)
-    vectors = tmp
+    vectors = [vect.lift(lambda v: v[:-1].norm_squared()) for vect in vectors]
 
-    vectors = [vector.lift(lambda v: v[:-1].norm_squared())
-               for vector in vectors]
-    # At this point we could switch the last two elements of each
-    # vector to get the matrix we want to test. But we can
-    # also just use the fact that if you swap 2 rows of a
-    # matrix, the sign of the determinant is flipped. So:
-    return - Matrix(*vectors).sign_det()
+    infinite_count = 0
+    for vect in vectors:
+        if vect[-2] == 0:  # this is the homogeneous coordinate
+            infinite_count += 1
+
+    if infinite_count is 0:
+        return - Matrix(*vectors).sign_det()  # the easy case
+
+    else:
+        # I'll probably need to make a matrix of finite points equivalent
+        # to the infinite ones, although I'm testing the easy way first.
+        # That part should/will go right here.
+        # Wow, never mind, the tests pass.
+        results = set()
+        for i in range(len(vectors)):
+            if vectors[i][-2] == 0:
+                new = [*vectors[:i],
+                       # notice the negative coord here to cancel
+                       # the rows having been swapped
+                       Vector(*([0] * (len(vectors) - 1)), -1),
+                       *vectors[i+1:]]
+                results.add(Matrix(*new).sign_det())
+
+        return sum(results)  # will be -1, 0, or 1
