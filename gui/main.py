@@ -155,6 +155,7 @@ class Triangulation_GUI(Frame):
         self.canvas.bind("<BackSpace>", self.clear)
         self.canvas.bind("<v>", self.toggle_voronoi)
         self.canvas.bind("s", self.toggle_visualization)
+        self.canvas.bind("p", self.print_point_history)
         self.canvas.focus_set()
         self.canvas.pack(fill=BOTH, expand=1)
 
@@ -198,6 +199,10 @@ class Triangulation_GUI(Frame):
         if points[0][2] == 0 or points[1][2] == 0:
             return True
         return False
+
+    def print_point_history(self, event):
+        """Print to stdout the list of points added so far, in order"""
+        print(self.d.point_history.__repr__())
 
 
 def main():
