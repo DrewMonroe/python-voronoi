@@ -198,22 +198,5 @@ class VoronoiTestCase(unittest.TestCase):
         self.assertTrue(len(vor.points) == 1)
         self.assertTrue(len(vor.edges) == 3)
 
-    def test_convex_hull_bug(self):
-        """Eliminate bugs where the the convex hull becomes concave."""
-
-        # This case is prohibitively big to test properly
-        # points = [Point(*coords) for coords in [
-        #     (248, 508, 1), (709, 346, 1), (820, 535, 1), (427, 274, 1),
-        #     (671, 220, 1), (927, 342, 1), (612, 627, 1), (762, 633, 1),
-        #     (161, 238, 1), (71, 102, 1), (185, 25, 1), (233, 6, 1)]]
-        # del_tri = DelT(points, homogeneous=True, randomize=False)
-        # self.assertTrue(del_tri.test_is_delaunay())
-
-        # A nice clean 4 points that caused a bug.
-        points = [Point(*coords) for coords in [
-            (582, 245, 1), (649, 400, 1), (854, 279, 1), (411, 176, 1)]]
-        del_tri = DelT(points, homogeneous=True, randomize=False)
-        self.assertEqual(len(del_tri.face_point_sets()), 3)
-
 if __name__ == '__main__':
     unittest.main()
