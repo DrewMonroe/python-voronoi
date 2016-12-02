@@ -95,13 +95,13 @@ class Triangulation_GUI(Frame):
                                 outline=color, dash=(5,), tag="circle")
         self.canvas.update_idletasks()
 
-    def highlight_edge(self, facet, color="black", tag="edge"):
+    def highlight_edge(self, facet, color="black", tag="edge", add=True):
         points = []
         for point in facet.points():
             points.append(point[0])
             points.append(point[1])
         line = self.canvas.create_line(*points, fill=color, tag=tag)
-        if color == "black":
+        if add:
             self.edge_dic[facet] = line
         self.canvas.update()
 
