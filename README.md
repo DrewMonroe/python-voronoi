@@ -12,7 +12,9 @@ To run a particular test, run `python3 -m unittest -v pyVor.tests.testPredicates
 (optionally replacing `testPredicates` with the test you actually want to run).
 
 ### Requirements
-- tk (needs to be installed via package manager. For example `pacman -S tk`)
+- If running on Linux, the GUI requires tk to be installed via package manager
+(for example `pacman -S tk`) since it does not ship with the Linux version
+of python
 
 ### Running Arbitrary Files
 `python3 -m pyVor.path.to.file`
