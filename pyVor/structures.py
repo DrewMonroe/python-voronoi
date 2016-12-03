@@ -7,6 +7,7 @@ from random import shuffle
 # "O(n log(n)) for PPT adversaries" is not an important feature
 from pyVor.primitives import Point
 from pyVor.predicates import ccw, incircle
+from pyVor.utils import circumcenter
 
 
 def outer_face_pts(dimension):
