@@ -37,7 +37,6 @@ def ccw(*points, homogeneous=True):
 def incircle(*points, homogeneous=True):
     """Returns 1 if the last point is inside the circle defined by the other
     three, -1 if outside, and 0 if all cocircular.
-
     The points are interpreted as having extended homogenious
     coordinates unless homogeneous=False is passed.
     """

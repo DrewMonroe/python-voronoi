@@ -1,13 +1,13 @@
-#!/usr/bin/env python3
+# !/usr/bin/env python3
 
 """Data structures. Enough said."""
 
 from random import shuffle
 # We could seed with /dev/urandom, but
 # "O(n log(n)) for PPT adversaries" is not an important feature
-
 from pyVor.primitives import Point
 from pyVor.predicates import ccw, incircle
+from pyVor.utils import circumcenter
 
 
 def outer_face_pts(dimension):
@@ -80,7 +80,7 @@ class DelaunayTriangulation:
             return 'Vertex({})'.format(str(self.point))
 
         # def __eq__(self, other):  # I'd prefer pointer comparison
-        #     return self.point == other.point
+        #    return self.point == other.point
 
         def __hash__(self):
             return hash(self.point)
@@ -142,6 +142,20 @@ class DelaunayTriangulation:
                 raise GeneralPositionError
             self.twin = twin
 
+        def __hash__(self):
+            return hash(self._vertices)
+
+        def __eq__(self, other):
+            return self.vertices() == other.vertices()
+
+        def is_infinite(self):
+            """Does the edge contain infinite points?"""
+            points = self.points()
+            for point in points:
+                if point[-1] == 0:
+                    return True
+            return False
+
         def vertices(self):
             """get the vertices, which may be stored implicitly"""
             return self._vertices
@@ -191,7 +205,12 @@ class DelaunayTriangulation:
                 str(key) + str(value) for key, value in self.__dict__.items()
                 if not isinstance(value, type(self))])
 
-    def __init__(self, points, randomize=True, homogeneous=True, name='anon', function=None):
+    def __init__(self, points, randomize=True, homogeneous=True,
+                 # location_visualizer=None, draw_circle=None,
+                 # draw_triangulation=None,
+                 # highlight_edge=None,
+                 gui=None):  # visualization=False, delete_edge=None
+
         """Construct the delaunay triangulation of the point list"""
         if not homogeneous:
             points = [pt.lift(lambda x: 1) for pt in points]
@@ -201,8 +220,14 @@ class DelaunayTriangulation:
         # The resulting "outer face" contains every point in R^d
         self.faces = set([self.Face(outer_face)])
         self.vertices = set(outer_face)
-        self.name = name  # for debugging. unittest is too parallel for me
-        self.function = function
+        self.facets = set()
+        self.gui = gui
+        # self.gui.draw_point_locate = location_visualizer  # ???
+        # self.gui.draw_circle = draw_circle
+        # self.gui.draw_triangulation = draw_triangulation
+        # self.gui.highlight_edge = highlight_edge
+        # self.gui.visualization = visualization
+        # self.gui.delete_edge = delete_edge
         if randomize:
             shuffle(points)  # randomize this thing (in place)
         self.point_history = []  # per request of gui folks
@@ -214,12 +239,15 @@ class DelaunayTriangulation:
         # print('\n{}'.format(len(self.faces)))
         if homogeneous is False:
             point = point.lift(lambda x: 1)
-        for p in self.point_history:
-            if p == point:
-                return
+        if point in self.point_history:
+            return
         self.point_history.append(point)
         # dead_face = self.locate(point)
         hf_stack = set(self._face_shatter(self.locate(point)))
+        if self.gui and self.gui.visualization:
+            for facet in hf_stack:
+                if not facet.is_infinite():
+                    self.gui.highlight_edge(facet)
         # already_processed = set()
         new_vert = self.Vertex(point)
         self.vertices.add(new_vert)
@@ -234,12 +262,38 @@ class DelaunayTriangulation:
             #     already_processed.add(free_facet)
             if free_facet.locally_delaunay(new_vert):
                 ld_halffacets.add(free_facet)
+                # Do gui things. This all ought to be refactored so that
+                # we just return a list and the GUI decides what to do
+                # with it.
+                if (self.gui and self.gui.visualization and
+                        free_facet.twin and not free_facet.is_infinite()):
+                    self.gui.highlight_edge(free_facet, color="red",
+                                            tag="highlight_edge", add=False)
+                    self.gui.draw_circle(free_facet.twin.face, sleep=True)
             else:
                 # Add them all to the queue/stack/stueue/quack
                 if free_facet.twin.face not in self.faces:
                     continue
-                hf_stack.update(self._facet_pop(
-                    free_facet, free_facet.twin.face))
+                facets = self._facet_pop(free_facet, free_facet.twin.face)
+                hf_stack.update(facets)
+
+                # More gui things
+                if self.gui and self.gui.visualization:
+                    for facet in facets:
+                        if not facet.is_infinite():
+                            self.gui.highlight_edge(facet)
+                if (self.gui and self.gui.visualization and free_facet.twin and
+                        not free_facet.is_infinite()):
+                    for facet in facets:
+                        self.gui.highlight_edge(facet)
+                    self.gui.draw_triangulation(self)
+                    self.gui.highlight_edge(free_facet, color="red",
+                                            tag="highlight_edge", add=False)
+                    self.gui.draw_circle(free_facet.twin.face, color="red",
+                                         delete=True, sleep=True)
+                    self.gui.delete_edge(free_facet)
+            if self.gui and self.gui.visualization:
+                self.gui.draw_triangulation(self, sleep=True)
         new_faces = []
         for halffacet in ld_halffacets:
             # I have to link up all these edges now
@@ -264,6 +318,8 @@ class DelaunayTriangulation:
                     link_us[0].twin = link_us[1]
                     link_us[1].twin = link_us[0]
         # [face for face in new_faces if face not in self.faces])
+        if self.gui and self.gui.visualization:
+            self.gui.draw_triangulation(self, clear=True)
         self.faces.update(new_faces)
 
     def _face_shatter(self, face):
@@ -292,8 +348,8 @@ class DelaunayTriangulation:
         not_done = True
         current_face = self._arbitrary_face()
         while not_done:
-            if self.function:
-                self.function(current_face)
+            if self.gui and self.gui.visualization:
+                self.gui.draw_point_locate(current_face)
             not_done = False
             for halffacet in current_face.iter_facets():
                 if halffacet.lineside(point) == -1:
@@ -347,8 +403,12 @@ class DelaunayTriangulation:
         """Get an arbitrary face of the triangulation"""
         return next(iter(self.faces))  # Hideous
 
-    def set_function(self, funct):
-        self.function = funct
+    # def set_visualize(self, val):
+    #     self.gui.visualization = val
+
+    def get_facets(self):
+        """A getter, for whatever reason"""
+        return self.facets
 
 # _face_shatter delete face and return all facets of it. (As inner
 # HalfFacets)
@@ -362,3 +422,27 @@ class DelaunayTriangulation:
 #     (Need to deal with linking the faces of the star together)
 
 # half_facets solve the problem of storing an outer face. Nice.
+
+
+class Voronoi:
+    """A data structure primarily used for drawing the Voronoi diagram"""
+    def __init__(self, triangulation):
+        self.points = set()
+        self.edges = set()
+        finite_faces = (f for f in triangulation.faces if self._is_finite(f))
+        for face in finite_faces:
+            point = circumcenter(*face.points())
+            self.points.add(point)
+            for half_facet in face.iter_facets():
+                if half_facet.twin:
+                    adj_point = circumcenter(*half_facet.twin.face.points())
+                    if not self._is_finite(half_facet.twin.face):
+                        tmp_vec = (adj_point.to_vector()[:-1])*(1/1000000000)
+                        adj_point = Point(*tmp_vec.to_array())
+                        adj_point = adj_point.lift(lambda *args: 0)
+                    self.edges.add(frozenset([point, adj_point]))
+
+    def _is_finite(self, face):
+        """Checks if the face is only made of finite points"""
+        return [p[-1] for p in face.points()] == [1]*len(face.points())
+
