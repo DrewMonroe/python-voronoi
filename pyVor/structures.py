@@ -276,7 +276,6 @@ class DelaunayTriangulation:
                     continue
                 facets = self._facet_pop(free_facet, free_facet.twin.face)
                 hf_stack.update(facets)
-
                 # More gui things
                 if self.gui and self.gui.visualization:
                     for facet in facets:
@@ -284,8 +283,6 @@ class DelaunayTriangulation:
                             self.gui.highlight_edge(facet)
                 if (self.gui and self.gui.visualization and free_facet.twin and
                         not free_facet.is_infinite()):
-                    for facet in facets:
-                        self.gui.highlight_edge(facet)
                     self.gui.draw_triangulation(self)
                     self.gui.highlight_edge(free_facet, color="red",
                                             tag="highlight_edge", add=False)
@@ -437,12 +434,11 @@ class Voronoi:
                 if half_facet.twin:
                     adj_point = circumcenter(*half_facet.twin.face.points())
                     if not self._is_finite(half_facet.twin.face):
-                        tmp_vec = (adj_point.to_vector()[:-1])*(1/1000000000)
+                        tmp_vec = (adj_point.to_vector()[:-1]) * (1 / 1000000000)
                         adj_point = Point(*tmp_vec.to_array())
                         adj_point = adj_point.lift(lambda *args: 0)
                     self.edges.add(frozenset([point, adj_point]))
 
     def _is_finite(self, face):
         """Checks if the face is only made of finite points"""
-        return [p[-1] for p in face.points()] == [1]*len(face.points())
-
+        return [p[-1] for p in face.points()] == [1] * len(face.points())
