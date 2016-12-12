@@ -162,6 +162,8 @@ class TriangulationGUI(Frame):
         self.canvas = Canvas(self)
         self.canvas.bind("<Button-1>", self.click)
         self.canvas.bind("c", self.show_circle)
+        self.canvas.bind("<Button-2>", self.show_circle)
+        self.canvas.bind("<Button-3>", self.show_circle)
         self.canvas.bind("<BackSpace>", self.clear)
         self.canvas.bind("<v>", self.toggle_voronoi)
         self.canvas.bind("s", self.toggle_visualization)

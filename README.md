@@ -24,7 +24,8 @@ of python
 To run the GUI, simply run `python3 main/gui.py`
 Key bindings are as follows:
 - `left click` to add a point
-- `c` on a triangle to show the circumcircle
+- `c`, `right click`, or `middle button`  on a triangle to show the circumcircle
+  (`c` does not work on MAC OS)
 - `<backspace>` to clear all circumcircles
 - `s` to toggle visualization
 - `v` to toggle showing the Voronoi diagram
