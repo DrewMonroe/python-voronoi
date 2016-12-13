@@ -102,6 +102,17 @@ class DelaunayTriangulation:
                         self)
             # self.vertices = set(self.vertices)  # my new favorite data type
 
+        def __str__(self):
+            """ """
+            s = ""
+            for vert in self.vertices:
+                s += str(vert.point) + ", "
+
+            return s[:-2]
+
+        def __repr__(self):
+            return self.__str__()
+
         def points(self):
             """Iterate through the points.
 
@@ -233,6 +244,13 @@ class DelaunayTriangulation:
         self.point_history = []  # per request of gui folks
         for point in points:
             self.delaunay_add(point)
+
+    def __str__(self):
+        """ Have the string representation be JSON """
+        return str([[face] for face in self.faces])
+
+    def __repr__(self):
+        return self.__str__()
 
     def delaunay_add(self, point, homogeneous=True):
         """Add a point and then recover the delaunay property"""
@@ -434,7 +452,8 @@ class Voronoi:
                 if half_facet.twin:
                     adj_point = circumcenter(*half_facet.twin.face.points())
                     if not self._is_finite(half_facet.twin.face):
-                        tmp_vec = (adj_point.to_vector()[:-1]) * (1 / 1000000000)
+                        tmp_vec = ((adj_point.to_vector()[:-1]) *
+                                   (1 / 1000000000))
                         adj_point = Point(*tmp_vec.to_array())
                         adj_point = adj_point.lift(lambda *args: 0)
                     self.edges.add(frozenset([point, adj_point]))
